@@ -1,0 +1,54 @@
+[
+    {
+        "stateName": "\u0412\u0456\u043d\u043d\u0438\u0446\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 4, "coordinat": [
+        540, 430]}, {
+        "stateName": "\u0412\u043e\u043b\u0438\u043d\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 8, "coordinat": [
+        211, 171]}, {
+        "stateName": "\u0414\u043d\u0456\u043f\u0440\u043e\u043f\u0435\u0442\u0440\u043e\u0432\u0441\u044c\u043a\u0456 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 9, "coordinat": [
+        1065, 480]}, {
+        "stateName": "\u0414\u043e\u043d\u0435\u0446\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 28, "coordinat": [
+        1270, 520]}, {
+        "stateName": "\u0416\u0438\u0442\u043e\u043c\u0438\u0440\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 10, "coordinat": [
+        457, 219]}, {
+        "stateName": "\u0417\u0430\u043a\u0430\u0440\u043f\u0430\u0442\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 11, "coordinat": [
+        55, 510]}, {
+        "stateName": "\u0417\u0430\u043f\u043e\u0440\u0456\u0437\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 12, "coordinat": [
+        1105, 634]}, {
+        "stateName": "\u0406\u0432\u0430\u043d\u043e-\u0424\u0440\u0430\u043d\u043a\u0456\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 13, "coordinat": [
+        200, 460]}, {
+        "stateName": "\u041a\u0438\u0457\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 14, "coordinat": [
+        675, 310]}, {
+        "stateName": "\u041a\u0456\u0440\u043e\u0432\u043e\u0433\u0440\u0430\u0434\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 15, "coordinat": [
+        840, 480]}, {
+        "stateName": "\u041b\u0443\u0433\u0430\u043d\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 16, "coordinat": [
+        1375, 400]}, {
+        "stateName": "\u041b\u044c\u0432\u0456\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 27, "coordinat": [
+        131, 264]}, {
+        "stateName": "\u041c\u0438\u043a\u043e\u043b\u0430\u0457\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 17, "coordinat": [
+        820, 615]}, {
+        "stateName": "\u041e\u0434\u0435\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 18, "coordinat": [
+        680, 700]}, {
+        "stateName": "\u041f\u043e\u043b\u0442\u0430\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 19, "coordinat": [
+        849, 296]}, {
+        "stateName": "\u0420\u0456\u0432\u043d\u0435\u043d\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 5, "coordinat": [
+        355, 190]}, {
+        "stateName": "\u0421\u0443\u043c\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 20, "coordinat": [
+        990, 180]}, {
+        "stateName": "\u0422\u0435\u0440\u043d\u043e\u043f\u0456\u043b\u044c\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 21, "coordinat": [
+        290, 390]}, {
+        "stateName": "\u0425\u0430\u0440\u043a\u0456\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 22, "coordinat": [
+        1200, 315]}, {
+        "stateName": "\u0425\u0435\u0440\u0441\u043e\u043d\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 23, "coordinat": [
+        950, 700]}, {
+        "stateName": "\u0425\u043c\u0435\u043b\u044c\u043d\u0438\u0446\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 3, "coordinat": [
+        340, 314]}, {
+        "stateName": "\u0427\u0435\u0440\u043a\u0430\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 24, "coordinat": [
+        760, 395]}, {
+        "stateName": "\u0427\u0435\u0440\u043d\u0456\u0432\u0435\u0446\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 26, "coordinat": [
+        315, 510]}, {
+        "stateName": "\u0427\u0435\u0440\u043d\u0456\u0433\u0456\u0432\u0441\u044c\u043a\u0456\u0439 \u043e\u0431\u043b\u0430\u0441\u0442\u0456", "stateId": 25, "coordinat": [
+        805, 130]}, {
+        "stateName": "\u043c. \u041a\u0438\u0454\u0432\u0456", "stateId": 31, "coordinat": [
+        700, 245]
+    }
+]
