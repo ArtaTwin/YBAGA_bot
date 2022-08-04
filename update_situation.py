@@ -5,9 +5,10 @@ from datetime       import datetime
 from time           import time, sleep
 from pytz           import timezone
 from telebot        import TeleBot
+import secret
 print("update_situatiaon.py started")
 
-bot = TeleBot('5126680353:AAEBPAGPSNfb-_g-yxBdEd7Ku3vtdP0mbBM')
+bot = TeleBot(secret.TOKEN)
 
 def chek(x):
     #False if ok
