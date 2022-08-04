@@ -3,6 +3,7 @@ from json      import load, dump
 from datetime  import datetime
 from threading import Thread
 from time      import time
+5
 
 bot = TeleBot('5126680353:AAEBPAGPSNfb-_g-yxBdEd7Ku3vtdP0mbBM')
 flag = True
