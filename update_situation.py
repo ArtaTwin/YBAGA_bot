@@ -27,7 +27,7 @@ def color(t,alarm):
         return (150,0,0) if alarm else (0,120,0)
     elif x == 2:
         return (100,0,0) if alarm else (0,120,50)
-    raise ValueError(f'Прийнято {x}. t1 = {t1}, t2 = {t2}')
+    raise ValueError(f'Прийнято {x}. t1 = {int(time())}, t2 = {t}')
 
 def draw(color,coordinat):
     global pixlist

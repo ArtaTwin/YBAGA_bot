@@ -4,6 +4,7 @@ from datetime  import datetime
 from threading import Thread
 from time      import time
 import secret
+print("Trevoga_bot.py started")
 
 bot = TeleBot(secret.TOKEN)
 flag = True
