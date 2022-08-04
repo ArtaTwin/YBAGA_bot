@@ -114,11 +114,11 @@ while True:
 
         for stat in good_list:
             for user_id in Info[stat]:
-                bot.send_message(user_id, f"У {statsM_x_name} закінчилася тривога",parse_mode='html')
+                bot.send_message(user_id, f"У {stat} закінчилася тривога",parse_mode='html')
 
         for stat in bad_list:
             for user_id in Info[stat]:
-                bot.send_message(user_id, f"У {statsM_x_name} почалася тривога",parse_mode='html')
+                bot.send_message(user_id, f"У {stat} почалася тривога",parse_mode='html')
 
     #clearing RAM
     del good_list, bad_list, new
