@@ -42,7 +42,37 @@ def draw(color,coordinat):
 
 while True:
     #load
-    situation = load(open('new_situation.json' , "rb"))["situation"]
+    try:
+        situation = load(open('new_situation.json' , "rb"))["situation"]
+    except Exception as e:
+        print(e)
+        situation = [
+            {"stateName": "Вінницька область", "alarm": False, "data" : 0},
+            {"stateName": "Волинська область", "alarm": False, "data" : 0},
+            {"stateName": "Дніпропетровська область", "alarm": False, "data" : 0},
+            {"stateName": "Донецька область", "alarm": False, "data" : 0},
+            {"stateName": "Житомирська область", "alarm": False, "data" : 0},
+            {"stateName": "Закарпатська область", "alarm": False, "data" : 0},
+            {"stateName": "Запорізька область", "alarm": False, "data" : 0},
+            {"stateName": "Івано-Франківська область", "alarm": False, "data" : 0},
+            {"stateName": "Київська область", "alarm": False, "data" : 0},
+            {"stateName": "Кіровоградська область", "alarm": False, "data" : 0},
+            {"stateName": "Луганська область", "alarm": False, "data" : 0},
+            {"stateName": "Львівська область", "alarm": False, "data" : 0},
+            {"stateName": "Миколаївська область", "alarm": False, "data" : 0},
+            {"stateName": "Одеська область", "alarm": False, "data" : 0},
+            {"stateName": "Полтавська область", "alarm": False, "data" : 0},
+            {"stateName": "Рівненська область", "alarm": False, "data" : 0},
+            {"stateName": "Сумська область", "alarm": False, "data" : 0},
+            {"stateName": "Тернопільська область", "alarm": False, "data" : 0},
+            {"stateName": "Харківська область", "alarm": False, "data" : 0},
+            {"stateName": "Херсонська область", "alarm": False, "data" : 0},
+            {"stateName": "Хмельницька область", "alarm": False, "data" : 0},
+            {"stateName": "Черкаська область", "alarm": False, "data" : 0},
+            {"stateName": "Чернівецька область", "alarm": False, "data" : 0},
+            {"stateName": "Чернігівська область", "alarm": False, "data" : 0},
+            {"stateName": "м. Київ", "alarm": False, "data" : 0}
+        ]
     statsM = load(open('stats-M.json' , "rb"))
     image = Image.open("O.png").convert('RGB')
     pixlist = image.load()
