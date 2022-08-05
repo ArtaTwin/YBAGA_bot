@@ -124,10 +124,11 @@ while True:
 
         #clearing RAM
         del good_list, bad_list, new
-    except Exception as e:
-        print(e)
+    except Exception as e1:
+        print(e1)
         try:
-            bot.send_message(965712322, e)
-        except Exception as e:
+            bot.send_message(965712322, str(e1))
+        except Exception as e2:
             print("Bad connection, Telegram API does not work")
+            print(e2)
     sleep(30)
