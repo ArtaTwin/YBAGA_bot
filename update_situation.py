@@ -41,86 +41,93 @@ def draw(color,coordinat):
         pixels,next_pixels = next_pixels, set()
 
 while True:
-    #load
     try:
-        situation = load(open('new_situation.json' , "rb"))["situation"]
+
+        #load
+        try:
+            situation = load(open('new_situation.json' , "rb"))["situation"]
+        except Exception as e:
+            print(e)
+            situation = [
+                {"stateName": "Вінницька область", "alarm": False, "data" : 0},
+                {"stateName": "Волинська область", "alarm": False, "data" : 0},
+                {"stateName": "Дніпропетровська область", "alarm": False, "data" : 0},
+                {"stateName": "Донецька область", "alarm": False, "data" : 0},
+                {"stateName": "Житомирська область", "alarm": False, "data" : 0},
+                {"stateName": "Закарпатська область", "alarm": False, "data" : 0},
+                {"stateName": "Запорізька область", "alarm": False, "data" : 0},
+                {"stateName": "Івано-Франківська область", "alarm": False, "data" : 0},
+                {"stateName": "Київська область", "alarm": False, "data" : 0},
+                {"stateName": "Кіровоградська область", "alarm": False, "data" : 0},
+                {"stateName": "Луганська область", "alarm": False, "data" : 0},
+                {"stateName": "Львівська область", "alarm": False, "data" : 0},
+                {"stateName": "Миколаївська область", "alarm": False, "data" : 0},
+                {"stateName": "Одеська область", "alarm": False, "data" : 0},
+                {"stateName": "Полтавська область", "alarm": False, "data" : 0},
+                {"stateName": "Рівненська область", "alarm": False, "data" : 0},
+                {"stateName": "Сумська область", "alarm": False, "data" : 0},
+                {"stateName": "Тернопільська область", "alarm": False, "data" : 0},
+                {"stateName": "Харківська область", "alarm": False, "data" : 0},
+                {"stateName": "Херсонська область", "alarm": False, "data" : 0},
+                {"stateName": "Хмельницька область", "alarm": False, "data" : 0},
+                {"stateName": "Черкаська область", "alarm": False, "data" : 0},
+                {"stateName": "Чернівецька область", "alarm": False, "data" : 0},
+                {"stateName": "Чернігівська область", "alarm": False, "data" : 0},
+                {"stateName": "м. Київ", "alarm": False, "data" : 0}
+            ]
+        statsM = load(open('stats-M.json' , "rb"))
+        image = Image.open("O.png").convert('RGB')
+        pixlist = image.load()
+        good_list = []
+        bad_list = []
+        new = False
+
+        for x in range(25):
+            statsM_x = statsM[x]
+            if (chek_x := chek(statsM_x["stateId"])) != situation[x]["alarm"] :
+                new = True
+                if chek_x:
+                    situation[x]["alarm"] = True
+                    bad_list.append(statsM_x["stateName"])
+                else:
+                    situation[x]["alarm"] = False
+                    good_list.append(statsM_x["stateName"])
+                situation[x]["data"] = int(time())
+            draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
+
+        maket = Image.open('L.png')
+        image.paste(maket, (0, 0), maket)
+        image.save("N.png")
+
+        #clearing RAM
+        del statsM_x, chek_x, image, pixlist, statsM, maket
+
+        #save
+        data = "Станом на " +datetime.now(tz=timezone("Europe/Kiev")).strftime("%d.%m %H:%M")+" за Києвом\n\n"
+        with open('new_situation.json', 'w') as f:
+            dump({"data":data, "situation":situation}, f)
+
+        #clearing RAM
+        del situation
+
+        #notifications to users
+        if new:
+            Info = load(open('Info.json' , "rb"))
+
+            for stat in good_list:
+                for user_id in Info[stat]:
+                    bot.send_message(user_id, f"У {stat} закінчилася тривога",parse_mode='html')
+
+            for stat in bad_list:
+                for user_id in Info[stat]:
+                    bot.send_message(user_id, f"У {stat} почалася тривога",parse_mode='html')
+
+        #clearing RAM
+        del good_list, bad_list, new
     except Exception as e:
         print(e)
-        situation = [
-            {"stateName": "Вінницька область", "alarm": False, "data" : 0},
-            {"stateName": "Волинська область", "alarm": False, "data" : 0},
-            {"stateName": "Дніпропетровська область", "alarm": False, "data" : 0},
-            {"stateName": "Донецька область", "alarm": False, "data" : 0},
-            {"stateName": "Житомирська область", "alarm": False, "data" : 0},
-            {"stateName": "Закарпатська область", "alarm": False, "data" : 0},
-            {"stateName": "Запорізька область", "alarm": False, "data" : 0},
-            {"stateName": "Івано-Франківська область", "alarm": False, "data" : 0},
-            {"stateName": "Київська область", "alarm": False, "data" : 0},
-            {"stateName": "Кіровоградська область", "alarm": False, "data" : 0},
-            {"stateName": "Луганська область", "alarm": False, "data" : 0},
-            {"stateName": "Львівська область", "alarm": False, "data" : 0},
-            {"stateName": "Миколаївська область", "alarm": False, "data" : 0},
-            {"stateName": "Одеська область", "alarm": False, "data" : 0},
-            {"stateName": "Полтавська область", "alarm": False, "data" : 0},
-            {"stateName": "Рівненська область", "alarm": False, "data" : 0},
-            {"stateName": "Сумська область", "alarm": False, "data" : 0},
-            {"stateName": "Тернопільська область", "alarm": False, "data" : 0},
-            {"stateName": "Харківська область", "alarm": False, "data" : 0},
-            {"stateName": "Херсонська область", "alarm": False, "data" : 0},
-            {"stateName": "Хмельницька область", "alarm": False, "data" : 0},
-            {"stateName": "Черкаська область", "alarm": False, "data" : 0},
-            {"stateName": "Чернівецька область", "alarm": False, "data" : 0},
-            {"stateName": "Чернігівська область", "alarm": False, "data" : 0},
-            {"stateName": "м. Київ", "alarm": False, "data" : 0}
-        ]
-    statsM = load(open('stats-M.json' , "rb"))
-    image = Image.open("O.png").convert('RGB')
-    pixlist = image.load()
-    good_list = []
-    bad_list = []
-    new = False
-
-    for x in range(25):
-        statsM_x = statsM[x]
-        if (chek_x := chek(statsM_x["stateId"])) != situation[x]["alarm"] :
-            new = True
-            if chek_x:
-                situation[x]["alarm"] = True
-                bad_list.append(statsM_x["stateName"])
-            else:
-                situation[x]["alarm"] = False
-                good_list.append(statsM_x["stateName"])
-            situation[x]["data"] = int(time())
-        draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
-
-    maket = Image.open('L.png')
-    image.paste(maket, (0, 0), maket)
-    image.save("N.png")
-
-    #clearing RAM
-    del statsM_x, chek_x, image, pixlist, statsM, maket
-
-    #save
-    data = "Станом на " +datetime.now(tz=timezone("Europe/Kiev")).strftime("%d.%m %H:%M")+" за Києвом\n\n"
-    with open('new_situation.json', 'w') as f:
-        dump({"data":data, "situation":situation}, f)
-
-    #clearing RAM
-    del situation
-
-    #notifications to users
-    if new:
-        Info = load(open('Info.json' , "rb"))
-
-        for stat in good_list:
-            for user_id in Info[stat]:
-                bot.send_message(user_id, f"У {stat} закінчилася тривога",parse_mode='html')
-
-        for stat in bad_list:
-            for user_id in Info[stat]:
-                bot.send_message(user_id, f"У {stat} почалася тривога",parse_mode='html')
-
-    #clearing RAM
-    del good_list, bad_list, new
-
+        try:
+            bot.send_message(965712322, e)
+        except Exception as e:
+            print("Bad connection, Telegram API does not work")
     sleep(30)

@@ -100,6 +100,7 @@ def map(message):
 
 @bot.message_handler(commands=['form'])
 def k(message):
+    information(message)
     global Info
     Info = load(open('Info.json' , "rb"))
     markup = types.InlineKeyboardMarkup()
