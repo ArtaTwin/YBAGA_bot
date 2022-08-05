@@ -110,7 +110,7 @@ while True:
 
         #clearing RAM
         del situation
-        1/0
+
         #notifications to users
         if new:
             Info = load(open('Info.json' , "rb"))
