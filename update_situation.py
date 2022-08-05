@@ -5,6 +5,7 @@ from datetime       import datetime
 from time           import time, sleep
 from pytz           import timezone
 from telebot        import TeleBot
+from traceback      import format_exc
 import secret
 print("update_situatiaon.py started")
 
@@ -109,7 +110,7 @@ while True:
 
         #clearing RAM
         del situation
-
+        1/0
         #notifications to users
         if new:
             Info = load(open('Info.json' , "rb"))
@@ -126,8 +127,10 @@ while True:
         del good_list, bad_list, new
     except Exception as e1:
         print(e1)
+        var = format_exc()
+        print(var)
         try:
-            bot.send_message(965712322, str(e1))
+            bot.send_message(965712322, str(e1)+"\n\n"+var)
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
