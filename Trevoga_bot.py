@@ -50,7 +50,7 @@ def InfoFile(message):
 @bot.message_handler(commands=['start','help'])
 def start(message):
     information(message)
-    bot.send_message(message.chat.id, "/info - Надсилаю список з інформацію\n/map - Надсилаю мапу України\n/form - Надсилаю форму\n\n не працюю у группах",parse_mode='html')
+    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан по Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги (beta-функція)\n\n тимчасово не працюю у группах",parse_mode='html')
 
 @bot.message_handler(commands=['f'])
 def f(message):
