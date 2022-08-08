@@ -104,9 +104,8 @@ while True:
         del statsM_x, chek_x, image, pixlist, statsM, maket
 
         #save
-        data = "Станом на " +datetime.now(tz=timezone("Europe/Kiev")).strftime("%d.%m %H:%M")+" за Києвом\n\n"
         with open('new_situation.json', 'w') as f:
-            dump({"data":data, "situation":situation}, f)
+            dump({"data":datetime.now(tz=timezone("Europe/Kiev")).strftime("%d.%m %H:%M"), "situation":situation}, f)
 
         #clearing RAM
         del situation
@@ -117,11 +116,20 @@ while True:
 
             for stat in good_list:
                 for user_id in Info[stat]:
-                    bot.send_message(user_id, f"У {stat} закінчилася тривога",parse_mode='html')
+                    try:
+                        bot.send_message(user_id, f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>{stat}</b> відбій тривоги ✅', parse_mode='html')
+                    except Exception as e:
+                        if 'Forbidden: bot was blocked by the user' == str(e):
+                            bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
 
             for stat in bad_list:
                 for user_id in Info[stat]:
-                    bot.send_message(user_id, f"У {stat} почалася тривога",parse_mode='html')
+                    try:
+                        bot.send_message(user_id, f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У {stat} розпочалася тривога</b> 🚨',parse_mode='html')
+                    except Exception as e:
+                        if 'Forbidden: bot was blocked by the user' == str(e):
+                            bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
+
 
         #clearing RAM
         del good_list, bad_list, new
