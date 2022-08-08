@@ -39,7 +39,8 @@ def information(message):
 def restart(message):
     if message.from_user.id==965712322 or message.chat.id==552733968:
         bot.send_message(message.chat.id,f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')}\n Bot start to restart")
-        exit(1)
+        #This forces telebot to crash exit. It will be restarted by service script. We tried exit(1), KeyboardInterrup, but they don't work as good as 1/0
+        1/0
 
 @bot.message_handler(commands=['f'])
 def f(message):
