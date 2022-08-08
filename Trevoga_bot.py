@@ -35,6 +35,12 @@ def information(message):
         bot.send_message(965712322, f"📎🔵\n{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} :\n \nИмя:<pre>{message.from_user.first_name}</pre>\nПсевдоним:<pre>{message.from_user.username}</pre>\nUser_id=<pre>{message.from_user.id}</pre>\nmessage_id={message.message_id}\nlast_name:<pre>{message.from_user.last_name}</pre>\nТип чата:{message.chat.type}\nmess: {message.text}",parse_mode='html')
     #print(f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} /: \nИмя:{message.from_user.first_name} |Псевдоним:{message.from_user.username} |User_id={message.from_user.id} |message_id={message.message_id} |last_name:{message.from_user.last_name} |Тип чата:{message.chat.type} |mess: {message.text}\n")
 
+@bot.message_handler(commands=['restart', 'r'])
+def restart(message):
+    if message.from_user.id==965712322 or message.chat.id==552733968:
+        bot.send_message(message.chat.id,f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')}\n Bot start to restart")
+        exit(1)
+
 @bot.message_handler(commands=['f'])
 def f(message):
     if message.chat.id==965712322:
