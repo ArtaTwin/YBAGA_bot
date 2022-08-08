@@ -56,8 +56,8 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     information(message)
-    now = time.time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\n<pre>затримка: {round(now-message.date,2)} сек</pre>" ,parse_mode='html')
+    now = time()
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек")
 
 @bot.message_handler(commands=['start','help'])
 def start(message):
