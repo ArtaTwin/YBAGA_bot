@@ -1,5 +1,3 @@
-import migrations.migration_1_fix_luhansk_data
-
 from telebot   import TeleBot, types
 from json      import load, dump
 from datetime  import datetime
@@ -71,13 +69,13 @@ def testing(message):
 @bot.message_handler(commands=['start','help'])
 def start(message):
     information(message)
-    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан по Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги (beta-функція)\n\n тимчасово не працюю у группах",parse_mode='html')
+    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан по Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги",parse_mode='html')
 
 @bot.message_handler(commands=['info'])
 def info(message):
     information(message)
     loaded = load(open('new_situation.json' , "rb"))
-    text = f"Станом на {loaded['data']} за Києвом\n\nСитуація по Україні : \n"
+    text = f"Станом на {loaded['data']} за Києвом\n\nСитуація по регіонах Україні : \n"
 
     #loaded_situation
     loaded = loaded["situation"]
