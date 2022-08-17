@@ -1,3 +1,5 @@
+import migrations.migration_1_fix_luhansk_data
+
 from telebot   import TeleBot, types
 from json      import load, dump
 from datetime  import datetime

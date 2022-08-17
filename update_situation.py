@@ -119,7 +119,7 @@ while True:
                     try:
                         bot.send_message(user_id, f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>{stat}</b> відбій тривоги ✅', parse_mode='html')
                     except Exception as e:
-                        if 'Forbidden: bot was blocked by the user' == str(e):
+                        if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
 
             for stat in bad_list:
@@ -127,9 +127,8 @@ while True:
                     try:
                         bot.send_message(user_id, f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У {stat} розпочалася тривога</b> 🚨',parse_mode='html')
                     except Exception as e:
-                        if 'Forbidden: bot was blocked by the user' == str(e):
+                        if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
-
 
         #clearing RAM
         del good_list, bad_list, new
