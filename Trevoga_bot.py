@@ -101,8 +101,7 @@ def map(message):
     information(message)
     loaded = load(open('new_situation.json' , "rb"))
 
-    text="Тривога у:\n"
-    f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
+    text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
 
     #loaded_situation
     loaded = loaded["situation"]
