@@ -22,13 +22,14 @@ def chek(x):
         return chek(x)
 
 def color(t,alarm):
-    if (x := (int(time())-t)//7200) > 2:
+    score = (int(time())-t)//7200 #one score is two hours. score = [0;2]
+    if score>1: #2 or more
         return (50,0,0) if alarm else (0,120,100)
-    elif x == 0 or x == 1:
-        return (150,0,0) if alarm else (0,120,0)
-    elif x == 2:
+    if score == 1: #1
         return (100,0,0) if alarm else (0,120,50)
-    raise ValueError(f'Прийнято {x}. t1 = {int(time())}, t2 = {t}')
+    if score<0: #result cannot be negative
+        bot.send_message(965712322, f'Прийнято {score}. t1 = {int(time())}, t2 = {t}') #sending about flaw, score = min, 0
+    return (150,0,0) if alarm else (0,120,0) #if score == 0
 
 def draw(color,coordinat):
     global pixlist
@@ -120,7 +121,10 @@ while True:
                         bot.send_message(user_id, f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>{stat}</b> відбій тривоги ✅', parse_mode='html')
                     except Exception as e:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
-                            bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
+                            inactive_users.add(user_id)
+
+            if len(bad_list) > 23:
+                inactive_users = set()
 
             for stat in bad_list:
                 for user_id in Info[stat]:
@@ -128,10 +132,13 @@ while True:
                         bot.send_message(user_id, f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У {stat} розпочалася тривога</b> 🚨',parse_mode='html')
                     except Exception as e:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
-                            bot.send_message(965712322, f"\/\nuser_id : <pre>{user_id}</pre>",parse_mode='html')
+                            inactive_users.add(user_id)
+
+        if len(bad_list) > 23:
+                bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
 
         #clearing RAM
-        del good_list, bad_list, new
+        del good_list, bad_list, new, inactive_users
     except Exception as e1:
         print(e1)
         var = format_exc()
