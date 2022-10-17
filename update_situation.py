@@ -135,10 +135,11 @@ while True:
                             inactive_users.add(user_id)
 
         if len(bad_list) > 23:
-                bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
+            bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
+            del inactive_users
 
         #clearing RAM
-        del good_list, bad_list, new, inactive_users
+        del good_list, bad_list, new
     except Exception as e1:
         print(e1)
         var = format_exc()
