@@ -10,6 +10,7 @@ import secret
 print("update_situatiaon.py started")
 
 bot = TeleBot(secret.TOKEN)
+inactive_users = set()
 
 def chek(x):
     #False if ok
@@ -123,9 +124,6 @@ while True:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
 
-            if len(bad_list) > 23:
-                inactive_users = set()
-
             for stat in bad_list:
                 for user_id in Info[stat]:
                     try:
@@ -134,9 +132,8 @@ while True:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
 
-        if len(bad_list) > 23:
+        if len(bad_list) > 23 or len(good_list) > 23:
             bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
-            del inactive_users
 
         #clearing RAM
         del good_list, bad_list, new
