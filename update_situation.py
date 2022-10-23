@@ -132,7 +132,6 @@ while True:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
 
-        if len(bad_list) > 23 or len(good_list) > 23:
             bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
 
         #clearing RAM
