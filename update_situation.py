@@ -48,7 +48,7 @@ while True:
 
         #load
         try:
-            situation = load(open('new_situation.json' , "rb"))["situation"]
+            situation = load(open('JSONs/new_situation.json' , "rb"))["situation"]
         except Exception as e:
             print(e)
             situation = [
@@ -78,8 +78,8 @@ while True:
                 {"stateName": "Чернігівська область", "alarm": False, "data" : 0},
                 {"stateName": "м. Київ", "alarm": False, "data" : 0}
             ]
-        statsM = load(open('stats-M.json' , "rb"))
-        image = Image.open("O.png").convert('RGB')
+        statsM = load(open('JSONs/stats-M.json' , "rb"))
+        image = Image.open("PICTURES/O.png").convert('RGB')
         pixlist = image.load()
         good_list = []
         bad_list = []
@@ -98,15 +98,15 @@ while True:
                 situation[x]["data"] = int(time())
             draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
 
-        maket = Image.open('L.png')
+        maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
-        image.save("N.png")
+        image.save("PICTURES/N.png")
 
         #clearing RAM
         del statsM_x, chek_x, image, pixlist, statsM, maket
 
         #save
-        with open('new_situation.json', 'w') as f:
+        with open('JSONs/new_situation.json', 'w') as f:
             dump({"data":datetime.now(tz=timezone("Europe/Kiev")).strftime("%d.%m %H:%M"), "situation":situation}, f)
 
         #clearing RAM
@@ -114,7 +114,7 @@ while True:
 
         #notifications to users
         if new:
-            Info = load(open('Info.json' , "rb"))
+            Info = load(open('JSONs/Info.json' , "rb"))
 
             for stat in good_list:
                 for user_id in Info[stat]:

@@ -1,5 +1,12 @@
 secret.py
-new_situation.json
-N.png
 __pycache__
-Info.json
+
+#linux
+JSONs/new_situation.json
+JSONs/Info.json
+PICTURES/N.png
+
+#windows
+JSONs\new_situation.json
+JSONs\Info.json
+PICTURES\N.png

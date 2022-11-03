@@ -8,7 +8,7 @@ print("Trevoga_bot.py started")
 
 bot = TeleBot(secret.TOKEN)
 flag = True
-Info = load(open("Info.json", "rb"))
+Info = load(open("JSONs/Info.json", "rb"))
 
 def updater():
     import update_situation
@@ -57,7 +57,7 @@ def InfoFile(message):
                 s.add(i)
         bot.send_message(965712322, f"<pre>len: {len(s)}</pre>\n\n{s}",parse_mode='html')
         del s
-        bot.send_document(965712322, open('Info.json','rb'))
+        bot.send_document(965712322, open('JSONs/Info.json','rb'))
 
 #testing
 @bot.message_handler(commands=['test','t','ping','p'])
@@ -74,7 +74,7 @@ def start(message):
 @bot.message_handler(commands=['info'])
 def info(message):
     information(message)
-    loaded = load(open('new_situation.json' , "rb"))
+    loaded = load(open('JSONs/new_situation.json' , "rb"))
     text = f"Станом на {loaded['data']} за Києвом\n\nСитуація у регіонах Україні : \n"
 
     #loaded_situation
@@ -99,7 +99,7 @@ def info(message):
 @bot.message_handler(commands=['map'])
 def map(message):
     information(message)
-    loaded = load(open('new_situation.json' , "rb"))
+    loaded = load(open('JSONs/new_situation.json' , "rb"))
 
     text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
 
@@ -115,7 +115,7 @@ def map(message):
     if k==0:
         text.replace("Тривога у:","Тривоги немає ✅")
 
-    bot.send_photo(message.chat.id, open("N.png", 'rb'),text)
+    bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text)
 
 @bot.message_handler(commands=['form'])
 def form(message):
@@ -138,7 +138,7 @@ def callback_inline(call):
 
             global Info
             if call.data == 'close':
-                dump(Info, open('Info.json', 'w'))
+                dump(Info, open('JSONs/Info.json', 'w'))
                 t = "Повідомлення будуть надходити, коли змінюватиметься ситуація у: "
                 k = 1
                 for i in Info:
