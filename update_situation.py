@@ -7,9 +7,6 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
-
-from migrations import migration_1_fix_luhansk_data
-
 print("update_situatiaon.py started")
 
 bot = TeleBot(secret.TOKEN)
