@@ -75,7 +75,7 @@ def start(message):
 def info(message):
     information(message)
     loaded = load(open('JSONs/new_situation.json' , "rb"))
-    text = f"Станом на {loaded['data']} за Києвом\n\nСитуація у регіонах Україні : \n"
+    text = f"Станом на {loaded['data']} за Києвом\n\nСитуація у: \n"
 
     #loaded_situation
     loaded = loaded["situation"]

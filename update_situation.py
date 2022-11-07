@@ -23,6 +23,24 @@ def chek(x):
         sleep(20)
         return chek(x)
 
+#temporary function \/
+
+bot.send_message(965712322, "Начало")
+
+statsM = load(open('JSONs/stats-M.json' , "rb"))
+for x in range(25):
+    bot.send_message(965712322, x)
+    slee(0.5)
+    statsM_x = statsM[x]
+    fn = "JSONs/statistics/"+statsM_x["stateName"]+".json"
+    u = load(open(fn, "rb"))
+    u["CoP"] = chek(statsM_x["stateId"])
+    dump(u,open(fn,"w"))
+
+bot.send_message(965712322, "Все завершено")
+
+#temporary function /\
+
 def color(t,alarm):
     score = (int(time())-t)//7200 #one score is two hours. score = [0;2]
     if score>1: #2 or more
@@ -76,13 +94,17 @@ while True:
                     good_list.append(statsM_x["stateName"])
                 situation[x]["data"] = int(time())
             draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
+            name_file = "JSONs/statistics/"+statsM_x["stateName"]+".json"
+            file = load(open(name_file, "rb"))
+            file["points"].append(int(time()))
+            dump(file,open(name_file, "w"))
 
         maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
         image.save("PICTURES/N.png")
 
         #clearing RAM
-        del statsM_x, chek_x, image, pixlist, statsM, maket
+        del statsM_x, chek_x, image, pixlist, statsM, maket, name_file, file
 
         #save
         with open('JSONs/new_situation.json', 'w') as f:
