@@ -35,3 +35,4 @@ for x in range(len(new_situation["situation"])):
 
 f = open('JSONs/new_situation.json', 'w')
 dump(new_situation, f)
+f.close()

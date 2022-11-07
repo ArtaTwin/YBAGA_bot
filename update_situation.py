@@ -7,7 +7,7 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
-from migration import migration_2_fix_all_names
+from migrations import migration_2_fix_all_names
 
 print("update_situatiaon.py started")
 
