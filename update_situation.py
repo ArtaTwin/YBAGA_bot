@@ -30,7 +30,7 @@ bot.send_message(965712322, "Начало")
 statsM = load(open('JSONs/stats-M.json' , "rb"))
 for x in range(25):
     bot.send_message(965712322, x)
-    slee(0.5)
+    sleep(0.5)
     statsM_x = statsM[x]
     fn = "JSONs/statistics/"+statsM_x["stateName"]+".json"
     u = load(open(fn, "rb"))
