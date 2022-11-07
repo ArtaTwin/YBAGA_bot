@@ -7,6 +7,8 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
+from migration import migration_2_fix_all_names
+
 print("update_situatiaon.py started")
 
 bot = TeleBot(secret.TOKEN)
@@ -51,33 +53,11 @@ while True:
             situation = load(open('JSONs/new_situation.json' , "rb"))["situation"]
         except Exception as e:
             print(e)
-            situation = [
-                {"stateName": "Вінницька область", "alarm": False, "data" : 0},
-                {"stateName": "Волинська область", "alarm": False, "data" : 0},
-                {"stateName": "Дніпропетровська область", "alarm": False, "data" : 0},
-                {"stateName": "Донецька область", "alarm": False, "data" : 0},
-                {"stateName": "Житомирська область", "alarm": False, "data" : 0},
-                {"stateName": "Закарпатська область", "alarm": False, "data" : 0},
-                {"stateName": "Запорізька область", "alarm": False, "data" : 0},
-                {"stateName": "Івано-Франківська область", "alarm": False, "data" : 0},
-                {"stateName": "Київська область", "alarm": False, "data" : 0},
-                {"stateName": "Кіровоградська область", "alarm": False, "data" : 0},
-                {"stateName": "Луганська область", "alarm": False, "data" : 0},
-                {"stateName": "Львівська область", "alarm": False, "data" : 0},
-                {"stateName": "Миколаївська область", "alarm": False, "data" : 0},
-                {"stateName": "Одеська область", "alarm": False, "data" : 0},
-                {"stateName": "Полтавська область", "alarm": False, "data" : 0},
-                {"stateName": "Рівненська область", "alarm": False, "data" : 0},
-                {"stateName": "Сумська область", "alarm": False, "data" : 0},
-                {"stateName": "Тернопільська область", "alarm": False, "data" : 0},
-                {"stateName": "Харківська область", "alarm": False, "data" : 0},
-                {"stateName": "Херсонська область", "alarm": False, "data" : 0},
-                {"stateName": "Хмельницька область", "alarm": False, "data" : 0},
-                {"stateName": "Черкаська область", "alarm": False, "data" : 0},
-                {"stateName": "Чернівецька область", "alarm": False, "data" : 0},
-                {"stateName": "Чернігівська область", "alarm": False, "data" : 0},
-                {"stateName": "м. Київ", "alarm": False, "data" : 0}
-            ]
+
+            situation = [{"stateName": i, "alarm": False, "data" : int(time())} for i in [
+            'Вінницькій області', 'Волинській області', 'Дніпропетровські області', 'Донецькій області', 'Житомирській області', 'Закарпатській області', 'Запорізькій області', 'Івано-Франківській області', 'Київській області', 'Кіровоградській області', 'Луганській області', 'Львівській області', 'Миколаївській області', 'Одеській області', 'Полтавській області', 'Рівненській області', 'Сумській області', 'Тернопільській області', 'Харківській області', 'Херсонській області', 'Хмельницькій області', 'Черкаській області', 'Чернівецькій області', 'Чернігівській області', 'м. Києві'
+            ]]
+
         statsM = load(open('JSONs/stats-M.json' , "rb"))
         image = Image.open("PICTURES/O.png").convert('RGB')
         pixlist = image.load()
