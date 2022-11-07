@@ -24,7 +24,7 @@ def chek(x):
         return chek(x)
 
 #temporary function \/
-
+"""
 bot.send_message(965712322, "Начало")
 
 statsM = load(open('JSONs/stats-M.json' , "rb"))
@@ -37,7 +37,7 @@ for x in range(25):
     dump(u,open(fn,"w"))
 
 bot.send_message(965712322, "Все завершено")
-
+"""
 #temporary function /\
 
 def color(t,alarm):
