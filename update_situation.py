@@ -33,8 +33,7 @@ for x in range(25):
     sleep(0.5)
     statsM_x = statsM[x]
     fn = "JSONs/statistics/"+statsM_x["stateName"]+".json"
-    u = load(open(fn, "rb"))
-    u["CoP"] = chek(statsM_x["stateId"])
+    u = {"CoP" : chek(statsM_x["stateId"]), "points" : [int(time())]}
     dump(u,open(fn,"w"))
 
 bot.send_message(965712322, "Все завершено")
