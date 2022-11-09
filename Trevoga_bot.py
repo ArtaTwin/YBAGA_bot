@@ -61,16 +61,21 @@ def InfoFile(message):
         del s
         bot.send_document(965712322, open('JSONs/Info.json','rb'))
 
-@bot.message_handler(commands=['s'])
+@bot.message_handler(commands=['statistic'])
 def statistic(message):
-    if message.chat.id==965712322:
-        bot.send_message(message.chat.id, "ycugvhbijonkl")
-        ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
-        list_files = os.listdir(path="JSONs/statistics")
-        for i in list_files:
-            ziper.write("JSONs/statistics/"+i)
-        ziper.close()
-        bot.send_document(965712322, open('statistic.zip','rb'))
+    bot.send_message(message.chat.id, "ycugvhbijonkl")
+    try:
+        if message.chat.id==965712322:
+            ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
+            list_files = os.listdir(path="JSONs/statistics")
+            for i in list_files:
+                ziper.write("JSONs/statistics/"+i)
+            ziper.close()
+            bot.send_document(965712322, open('statistic.zip','rb'))
+    except Exception as e:
+        var = format_exc()
+        bot.send_message(965712322, str(e)+"\n\n"+var)
+
 
 #testing
 @bot.message_handler(commands=['test','t','ping','p'])
