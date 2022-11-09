@@ -82,7 +82,7 @@ def statistic(message):
 def testing(message):
     information(message)
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\n версія: 3.1")
 
 @bot.message_handler(commands=['start','help'])
 def start(message):
