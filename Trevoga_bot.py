@@ -63,7 +63,7 @@ def InfoFile(message):
 
 @bot.message_handler(commands=['statistic'])
 def statistic(message):
-    bot.send_message(message.chat.id, "ycugvhbijonkl")
+    bot.send_message(965712322, "ycugvhbijonkl")
     try:
         if message.chat.id==965712322:
             ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
