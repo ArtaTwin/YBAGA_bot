@@ -66,8 +66,9 @@ def statistic(message):
     if message.chat.id==965712322:
         ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
         list_files = os.listdir(path="JSONs/statistics")
-        for i in list_file:
-            ziper.write(i)
+        for i in list_files:
+            print(i)
+            ziper.write("JSONs/statistics/"+i)
         ziper.close()
         bot.send_document(965712322, open('statistic.zip','rb'))
 

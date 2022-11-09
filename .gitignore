@@ -1,12 +1,63 @@
 secret.py
 __pycache__
+statistic.zip
 
 #linux
 JSONs/new_situation.json
 JSONs/Info.json
 PICTURES/N.png
+JSONs/statistics/Вінницькій області
+JSONs/statistics/Волинській області
+JSONs/statistics/Дніпропетровські області
+JSONs/statistics/Донецькій області
+JSONs/statistics/Житомирській області
+JSONs/statistics/Закарпатській області
+JSONs/statistics/Запорізькій області
+JSONs/statistics/Івано-Франківській області
+JSONs/statistics/Київській області
+JSONs/statistics/Кіровоградській області
+JSONs/statistics/Луганській області
+JSONs/statistics/Львівській області
+JSONs/statistics/Миколаївській області
+JSONs/statistics/Одеській області
+JSONs/statistics/Полтавській області
+JSONs/statistics/Рівненській області
+JSONs/statistics/Сумській області
+JSONs/statistics/Тернопільській області
+JSONs/statistics/Харківській області
+JSONs/statistics/Херсонській області
+JSONs/statistics/Хмельницькій області
+JSONs/statistics/Черкаській області
+JSONs/statistics/Чернівецькій області
+JSONs/statistics/Чернігівській області
+JSONs/statistics/м. Києві
 
 #windows
 JSONs\new_situation.json
 JSONs\Info.json
 PICTURES\N.png
+JSONs\statistics\Вінницькій області
+JSONs\statistics\Волинській області
+JSONs\statistics\Дніпропетровські області
+JSONs\statistics\Донецькій області
+JSONs\statistics\Житомирській області
+JSONs\statistics\Закарпатській області
+JSONs\statistics\Запорізькій області
+JSONs\statistics\Івано-Франківській області
+JSONs\statistics\Київській області
+JSONs\statistics\Кіровоградській області
+JSONs\statistics\Луганській області
+JSONs\statistics\Львівській області
+JSONs\statistics\Миколаївській області
+JSONs\statistics\Одеській області
+JSONs\statistics\Полтавській області
+JSONs\statistics\Рівненській області
+JSONs\statistics\Сумській області
+JSONs\statistics\Тернопільській області
+JSONs\statistics\Харківській області
+JSONs\statistics\Херсонській області
+JSONs\statistics\Хмельницькій області
+JSONs\statistics\Черкаській області
+JSONs\statistics\Чернівецькій області
+JSONs\statistics\Чернігівській області
+JSONs\statistics\м. Києві
