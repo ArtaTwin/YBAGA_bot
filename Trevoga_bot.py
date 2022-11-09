@@ -3,6 +3,8 @@ from json      import load, dump
 from datetime  import datetime
 from threading import Thread
 from time      import time
+from zipfile   import ZipFile, ZIP_DEFLATED
+import os
 import secret
 print("Trevoga_bot.py started")
 
@@ -58,6 +60,16 @@ def InfoFile(message):
         bot.send_message(965712322, f"<pre>len: {len(s)}</pre>\n\n{s}",parse_mode='html')
         del s
         bot.send_document(965712322, open('JSONs/Info.json','rb'))
+
+@bot.message_handler(commands=['s'])
+def statistic(message):
+    if message.chat.id==965712322:
+        ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
+        list_files = os.listdir(path="JSONs/statistics")
+        for i in list_file:
+            ziper.write(i)
+        ziper.close()
+        bot.send_document(965712322, open('statistic.zip','rb'))
 
 #testing
 @bot.message_handler(commands=['test','t','ping','p'])
