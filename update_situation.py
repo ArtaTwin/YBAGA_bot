@@ -94,16 +94,16 @@ while True:
                 situation[x]["data"] = int(time())
             draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
             name_file = "JSONs/statistics/"+statsM_x["stateName"]+".json"
-            file = load(open(name_file, "rb"))
-            file["points"].append(int(time()))
-            dump(file,open(name_file, "w"))
+            #file = load(open(name_file, "rb"))
+            #file["points"].append(int(time()))
+            #dump(file,open(name_file, "w"))
 
         maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
         image.save("PICTURES/N.png")
 
         #clearing RAM
-        del statsM_x, chek_x, image, pixlist, statsM, maket, name_file, file
+        del statsM_x, chek_x, image, pixlist, statsM, maket, name_file #,file
 
         #save
         with open('JSONs/new_situation.json', 'w') as f:
