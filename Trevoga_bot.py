@@ -76,6 +76,11 @@ def statistic(message):
         var = format_exc()
         bot.send_message(965712322, str(e)+"\n\n"+var)
 
+@bot.message_handler(commands=['ns'])
+def send_new_situation(message):
+    if message.chat.id==965712322:
+        bot.send_message(965712322, "sending ns...")
+        bot.send_document(965712322, open("JSONs\new_situation.json",'rb'))
 
 #testing
 @bot.message_handler(commands=['test','t','ping','p'])
