@@ -129,4 +129,4 @@ while True:
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
-    sleep(20)
+    sleep(60)
