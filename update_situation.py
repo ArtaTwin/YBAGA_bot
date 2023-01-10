@@ -19,6 +19,11 @@ def chek(x):
     try:
         return urlopen(f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={x}').read(12) != b'{"alarms":[]'
     except Exception as e:
+        var = format_exc()
+        try:
+            bot.send_message(965712322, datetime.now().strftime("%x %X")+"\nError:"+str(e)+"\n\n var:"+var)
+        except Exception:
+            print("Bad connection, Telegram API does not work")
         print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
         print("program stopped to 20 seconds...")
         sleep(20)
@@ -129,4 +134,4 @@ while True:
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
-    sleep(60)
+    sleep(20)
