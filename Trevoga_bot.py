@@ -3,8 +3,6 @@ from json      import load, dump
 from datetime  import datetime
 from threading import Thread
 from time      import time
-from zipfile   import ZipFile, ZIP_DEFLATED
-import os
 import secret
 print("Trevoga_bot.py started")
 
@@ -32,7 +30,6 @@ def timedelta(t):
         return f" {t//86400} д"
 
 def information(message):
-    None
     if flag:
         bot.send_message(965712322, f"📎🔵\n{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} :\n \nИмя:<pre>{message.from_user.first_name}</pre>\nПсевдоним:<pre>{message.from_user.username}</pre>\nUser_id=<pre>{message.from_user.id}</pre>\nmessage_id={message.message_id}\nlast_name:<pre>{message.from_user.last_name}</pre>\nТип чата:{message.chat.type}\nmess: {message.text}",parse_mode='html')
     #print(f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} /: \nИмя:{message.from_user.first_name} |Псевдоним:{message.from_user.username} |User_id={message.from_user.id} |message_id={message.message_id} |last_name:{message.from_user.last_name} |Тип чата:{message.chat.type} |mess: {message.text}\n")
@@ -61,43 +58,20 @@ def InfoFile(message):
         del s
         bot.send_document(965712322, open('JSONs/Info.json','rb'))
 
-@bot.message_handler(commands=['statistic'])
-def statistic(message):
-    bot.send_message(965712322, "ycugvhbijonkl")
-    try:
-        if message.chat.id==965712322:
-            ziper = ZipFile('statistic.zip', mode= 'w', compression=ZIP_DEFLATED, allowZip64=True, compresslevel=8)
-            list_files = os.listdir(path="JSONs/statistics")
-            for i in list_files:
-                ziper.write("JSONs/statistics/"+i)
-            ziper.close()
-            bot.send_document(965712322, open('statistic.zip','rb'))
-    except Exception as e:
-        var = format_exc()
-        bot.send_message(965712322, str(e)+"\n\n"+var)
-
-@bot.message_handler(commands=['ns'])
-def send_new_situation(message):
-    if message.chat.id==965712322:
-        bot.send_message(965712322, "sending ns...")
-        bot.send_document(965712322, open("JSONs/new_situation.json",'rb'))
-
-
 #testing
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
-    information(message)
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\n версія: 3.1")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\n версія: 4.0")
+    information(message)
 
 @bot.message_handler(commands=['start','help'])
 def start(message):
-    information(message)
     bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан у регіонах Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги",parse_mode='html')
+    information(message)
 
 @bot.message_handler(commands=['info'])
 def info(message):
-    information(message)
     loaded = load(open('JSONs/new_situation.json' , "rb"))
     text = f"Станом на {loaded['data']} за Києвом\n\nСитуація у: \n"
 
@@ -119,10 +93,10 @@ def info(message):
     else:
         text += f"\nНа {statistic//25}% території України оголошено тривогу!"
     bot.send_message(message.chat.id, text,parse_mode='html')
+    information(message)
 
 @bot.message_handler(commands=['map'])
 def map(message):
-    information(message)
     loaded = load(open('JSONs/new_situation.json' , "rb"))
 
     text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
@@ -140,10 +114,10 @@ def map(message):
         text.replace("Тривога у:","Тривоги немає ✅")
 
     bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text)
+    information(message)
 
 @bot.message_handler(commands=['form'])
 def form(message):
-    information(message)
 
     markup = types.InlineKeyboardMarkup()
     for stat in Info:
@@ -154,6 +128,7 @@ def form(message):
 
     markup.add(types.InlineKeyboardButton("Згорнути перелік",callback_data="close"))
     bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде у:', reply_markup=markup)
+    information(message)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):

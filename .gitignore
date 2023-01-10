@@ -1,63 +1,12 @@
 secret.py
 __pycache__
-statistic.zip
 
 #linux
 JSONs/new_situation.json
 JSONs/Info.json
 PICTURES/N.png
-JSONs/statistics/Вінницькій області.json
-JSONs/statistics/Волинській області.json
-JSONs/statistics/Дніпропетровські області.json
-JSONs/statistics/Донецькій області.json
-JSONs/statistics/Житомирській області.json
-JSONs/statistics/Закарпатській області.json
-JSONs/statistics/Запорізькій області.json
-JSONs/statistics/Івано-Франківській області.json
-JSONs/statistics/Київській області.json
-JSONs/statistics/Кіровоградській області.json
-JSONs/statistics/Луганській області.json
-JSONs/statistics/Львівській області.json
-JSONs/statistics/Миколаївській області.json
-JSONs/statistics/Одеській області.json
-JSONs/statistics/Полтавській області.json
-JSONs/statistics/Рівненській області.json
-JSONs/statistics/Сумській області.json
-JSONs/statistics/Тернопільській області.json
-JSONs/statistics/Харківській області.json
-JSONs/statistics/Херсонській області.json
-JSONs/statistics/Хмельницькій області.json
-JSONs/statistics/Черкаській області.json
-JSONs/statistics/Чернівецькій області.json
-JSONs/statistics/Чернігівській області.json
-JSONs/statistics/м. Києві.json
 
 #windows
 JSONs\new_situation.json
 JSONs\Info.json
 PICTURES\N.png
-JSONs\statistics\Вінницькій області.json
-JSONs\statistics\Волинській області.json
-JSONs\statistics\Дніпропетровські області.json
-JSONs\statistics\Донецькій області.json
-JSONs\statistics\Житомирській області.json
-JSONs\statistics\Закарпатській області.json
-JSONs\statistics\Запорізькій області.json
-JSONs\statistics\Івано-Франківській області.json
-JSONs\statistics\Київській області.json
-JSONs\statistics\Кіровоградській області.json
-JSONs\statistics\Луганській області.json
-JSONs\statistics\Львівській області.json
-JSONs\statistics\Миколаївській області.json
-JSONs\statistics\Одеській області.json
-JSONs\statistics\Полтавській області.json
-JSONs\statistics\Рівненській області.json
-JSONs\statistics\Сумській області.json
-JSONs\statistics\Тернопільській області.json
-JSONs\statistics\Харківській області.json
-JSONs\statistics\Херсонській області.json
-JSONs\statistics\Хмельницькій області.json
-JSONs\statistics\Черкаській області.json
-JSONs\statistics\Чернівецькій області.json
-JSONs\statistics\Чернігівській області.json
-JSONs\statistics\м. Києві.json
