@@ -48,15 +48,19 @@ def draw(color,coordinat):
         pixels,next_pixels = next_pixels, set()
 
 def sr(x): #State Research
-    statsM_x = statsM[x]
-    chek_x = chek(statsM_x["stateId"])
-    if chek_x != situation[x]["alarm"]:
-        gb_lists[chek_x].append(statsM_x["stateName"])
-        situation[x]["alarm"] = chek_x
-        situation[x]["data"] = int(time())
-    draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
-    global done
-    done+=1
+    try:
+        statsM_x = statsM[x]
+        chek_x = chek(statsM_x["stateId"])
+        if chek_x != situation[x]["alarm"]:
+            gb_lists[chek_x].append(statsM_x["stateName"])
+            situation[x]["alarm"] = chek_x
+            situation[x]["data"] = int(time())
+        draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
+        global done
+        done+=1
+    except Exception as e:
+        bot.send_message(965712322, datetime.now().strftime("%x %X")+"\nError:"+str(e)+"\n\n var:"+format_exc())
+        print(format_exc())
 
 
 while True:
@@ -134,4 +138,4 @@ while True:
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
-    sleep(40)
+    sleep(20)
