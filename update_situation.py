@@ -6,7 +6,6 @@ from time           import time, sleep
 from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
-from threading      import Thread
 import secret
 
 print("update_situatiaon.py started")
@@ -47,22 +46,6 @@ def draw(color,coordinat):
                     pixlist[i[0]+n[0],i[1]+n[1]] = color
         pixels,next_pixels = next_pixels, set()
 
-def sr(x): #State Research
-    try:
-        statsM_x = statsM[x]
-        chek_x = chek(statsM_x["stateId"])
-        if chek_x != situation[x]["alarm"]:
-            gb_lists[chek_x].append(statsM_x["stateName"])
-            situation[x]["alarm"] = chek_x
-            situation[x]["data"] = int(time())
-        draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
-        global done
-        done+=1
-    except Exception as e:
-        bot.send_message(965712322, datetime.now().strftime("%x %X")+"\nError:"+str(e)+"\n\n var:"+format_exc())
-        print(format_exc())
-
-
 while True:
     try:
 
@@ -80,15 +63,15 @@ while True:
         image = Image.open("PICTURES/O.png").convert('RGB')
         pixlist = image.load()
         gb_lists = ( [], [] ) #good + bad lists = ( [good], [bad] )
-        done = 0
 
-        for i in range(25):
-            Thread(target=sr, args=[i], daemon=True).start()
-
-        while done < 25:
-            sleep(0.05)
-
-        del done
+        for x in range(25):
+            statsM_x = statsM[x]
+            chek_x = chek(statsM_x["stateId"])
+            if chek_x != situation[x]["alarm"]:
+                gb_lists[chek_x].append(statsM_x["stateName"])
+                situation[x]["alarm"] = chek_x
+                situation[x]["data"] = int(time())
+            draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
 
         maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
