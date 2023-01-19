@@ -45,7 +45,6 @@ def draw(color,coordinat):
                     next_pixels.add((i[0]+n[0],i[1]+n[1]))
                     pixlist[i[0]+n[0],i[1]+n[1]] = color
         pixels,next_pixels = next_pixels, set()
-
 while True:
     try:
 
@@ -59,13 +58,11 @@ while True:
             'Вінницькій області', 'Волинській області', 'Дніпропетровські області', 'Донецькій області', 'Житомирській області', 'Закарпатській області', 'Запорізькій області', 'Івано-Франківській області', 'Київській області', 'Кіровоградській області', 'Луганській області', 'Львівській області', 'Миколаївській області', 'Одеській області', 'Полтавській області', 'Рівненській області', 'Сумській області', 'Тернопільській області', 'Харківській області', 'Херсонській області', 'Хмельницькій області', 'Черкаській області', 'Чернівецькій області', 'Чернігівській області', 'м. Києві'
             ]]
 
-        statsM = load(open('JSONs/stats-M.json' , "rb"))
         image = Image.open("PICTURES/O.png").convert('RGB')
         pixlist = image.load()
         gb_lists = ( [], [] ) #good + bad lists = ( [good], [bad] )
 
-        for x in range(25):
-            statsM_x = statsM[x]
+        for x, statsM_x in enumerate(load(open('JSONs/stats-M.json' , "rb"))):
             chek_x = chek(statsM_x["stateId"])
             if chek_x != situation[x]["alarm"]:
                 gb_lists[chek_x].append(statsM_x["stateName"])
@@ -78,7 +75,7 @@ while True:
         image.save("PICTURES/N.png")
 
         #clearing RAM
-        del image, pixlist, statsM, maket
+        del image, pixlist, maket, statsM_x, chek_x, x
 
         #save
         with open('JSONs/new_situation.json', 'w') as f:

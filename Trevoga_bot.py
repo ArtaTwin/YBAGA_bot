@@ -2,7 +2,7 @@ from telebot   import TeleBot, types
 from json      import load, dump
 from datetime  import datetime
 from threading import Thread
-from time      import time
+from time      import time, sleep
 import secret
 print("Trevoga_bot.py started")
 
@@ -28,6 +28,9 @@ def timedelta(t):
         return f" {t//3600} год"
     if t > 86399:
         return f" {t//86400} д"
+
+def status_user(user_id, chat_id): #message.from_user.id, message.chat.id
+    return str(bot.get_chat_member(chat_id=chat_id, user_id=user_id).status)
 
 def information(message):
     if flag:
@@ -62,7 +65,7 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\n версія: 4.2 a")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {status_user(message.from_user.id, message.chat.id)}\n версія: 4.3 a")
     information(message)
 
 @bot.message_handler(commands=['start','help'])
@@ -118,10 +121,12 @@ def map(message):
 
 @bot.message_handler(commands=['form'])
 def form(message):
-
+    if message.chat.type != "private" and not (status_user(message.from_user.id, message.chat.id) == "creator" or status_user(message.from_user.id, message.chat.id) == "administrator"):
+            bot.send_message(message.chat.id, 'Налаштувати надсилання повідомлень у групу про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмінітратор</b>',parse_mode='html')
+            return
     markup = types.InlineKeyboardMarkup()
     for stat in Info:
-        if findl(Info[stat],message.from_user.id):
+        if findl(Info[stat],message.chat.id):
             markup.add(types.InlineKeyboardButton(stat+" ✅",callback_data="x"+stat))
         else:
             markup.add(types.InlineKeyboardButton(stat,callback_data=stat))
@@ -134,14 +139,18 @@ def form(message):
 def callback_inline(call):
     try:
         if call.message:
-
+            if call.message.chat.type != "private" and not (status_user(call.from_user.id, call.message.chat.id) == "creator" or status_user(call.from_user.id, call.message.chat.id) == "administrator"):
+                bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Взаємодіяти з цим таблом може тільки автор групи або адмінітратор")
+                return
             global Info
+            if call.message.chat.type != "private" :
+                sleep(1)
             if call.data == 'close':
                 dump(Info, open('JSONs/Info.json', 'w'))
                 t = "Повідомлення будуть надходити, коли змінюватиметься ситуація у: "
                 k = 1
                 for i in Info:
-                    if findl(Info[i],call.from_user.id) :
+                    if findl(Info[i],call.message.chat.id) :
                         t += f"\n {k}. "+i
                         k += 1
                 if k == 1:
@@ -149,14 +158,14 @@ def callback_inline(call):
                 bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=t, reply_markup=None)
                 return
             elif call.data[0] == "x":
-                Info[call.data[1::]].remove(call.from_user.id)
+                Info[call.data[1::]].remove(call.message.chat.id)
             else:
-                Info[call.data].append(call.from_user.id)
+                Info[call.data].append(call.message.chat.id)
 
             # remove inline buttons
             markup = types.InlineKeyboardMarkup()
             for stat in Info:
-                if findl(Info[stat],call.from_user.id):
+                if findl(Info[stat],call.message.chat.id):
                     markup.add(types.InlineKeyboardButton(stat+" ✅",callback_data="x"+stat))
                 else:
                     markup.add(types.InlineKeyboardButton(stat,callback_data=stat))
@@ -169,16 +178,15 @@ def callback_inline(call):
 
 
     except Exception as e1:
-        var = format_exc()
         try:
-            bot.send_message(965712322, str(e1)+"\n\n"+var)
+            bot.send_message(965712322, str(e1))
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
             print()
-            print(str(e1)+"\n\n"+var)
+            print(str(e1))
         bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Відбувся збій")
-        #bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, 'Відбувся збій.\nПовторіть спробу, будь ласка')
 
 bot.polling(none_stop=True, interval = 1)
