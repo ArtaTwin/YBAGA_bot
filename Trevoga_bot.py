@@ -30,7 +30,7 @@ def timedelta(t):
         return f" {t//86400} д"
 
 def status_user(user_id, chat_id): #message.from_user.id, message.chat.id
-    return str(bot.get_chat_member(chat_id=chat_id, user_id=user_id).status)
+    return bot.get_chat_member(chat_id=chat_id, user_id=user_id).status
 
 def information(message):
     if flag:
@@ -65,7 +65,7 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {status_user(message.from_user.id, message.chat.id)}\n версія: 4.3 a")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.4")
     information(message)
 
 @bot.message_handler(commands=['start','help'])
@@ -75,44 +75,38 @@ def start(message):
 
 @bot.message_handler(commands=['info'])
 def info(message):
+    #loaded_situation
     loaded = load(open('JSONs/new_situation.json' , "rb"))
     text = f"Станом на {loaded['data']} за Києвом\n\nСитуація у: \n"
-
-    #loaded_situation
-    loaded = loaded["situation"]
     statistic = 0
-    k = 0
 
-    for x in loaded:
-        k += 1
+    for k, x in enumerate(loaded["situation"], start=1):
         if x["alarm"]:
-            statistic+=100
-            text += f" {k}. <b>{x['stateName']}</b> - 🚨"
+            statistic+=4
+            text += f"{k}. <b>{x['stateName']}</b> - 🚨"
         else:
-            text += f" {k}. {x['stateName']} - ✅"
+            text += f"{k}. {x['stateName']} - ✅"
         text += timedelta(x['data'])+"\n"
-    if statistic==0:
-        text += "\n<b>Тривоги немає</b> ✅"
+    if statistic:
+        text += f"\nНа {statistic}% території України оголошено тривогу!"
     else:
-        text += f"\nНа {statistic//25}% території України оголошено тривогу!"
+        text += "\n<b>Тривоги немає</b> ✅"
+
     bot.send_message(message.chat.id, text,parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['map'])
 def map(message):
-    loaded = load(open('JSONs/new_situation.json' , "rb"))
-
-    text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
-
     #loaded_situation
-    loaded = loaded["situation"]
+    loaded = load(open('JSONs/new_situation.json' , "rb"))
+    text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"
     k = 0
 
-    for x in loaded:
+    for x in loaded["situation"]:
         if not x["alarm"]:
             continue
         k += 1
-        text += f" {k}. {x['stateName']}\n"
+        text += f"{k}. {x['stateName']}\n"
     if k==0:
         text.replace("Тривога у:","Тривоги немає ✅")
 
@@ -144,7 +138,7 @@ def callback_inline(call):
                 return
             global Info
             if call.message.chat.type != "private" :
-                sleep(1)
+                sleep(0.5)
             if call.data == 'close':
                 dump(Info, open('JSONs/Info.json', 'w'))
                 t = "Повідомлення будуть надходити, коли змінюватиметься ситуація у: "
