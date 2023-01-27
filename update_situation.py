@@ -85,7 +85,7 @@ while True:
         del situation
 
         #notifications to users
-        if bool(gb_lists[0]) or bool(gb_lists[1]):
+        if bool(gb_lists[0]) or bool(gb_lists[-1]):
             Info = load(open('JSONs/Info.json' , "rb"))
 
             for stat in gb_lists[0]: #good
