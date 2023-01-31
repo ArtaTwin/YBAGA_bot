@@ -65,12 +65,12 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.4")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.5")
     information(message)
 
 @bot.message_handler(commands=['start','help'])
 def start(message):
-    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан у регіонах Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги",parse_mode='html')
+    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан у регіонах Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['info'])
@@ -92,7 +92,7 @@ def info(message):
     else:
         text += "\n<b>Тривоги немає</b> ✅"
 
-    bot.send_message(message.chat.id, text,parse_mode='html')
+    bot.send_message(message.chat.id, text+"\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['map'])
@@ -110,12 +110,12 @@ def map(message):
     if k==0:
         text.replace("Тривога у:","Тривоги немає ✅")
 
-    bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text)
+    bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text+"\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['form'])
 def form(message):
-    if message.chat.type != "private" and not (status_user(message.from_user.id, message.chat.id) == "creator" or status_user(message.from_user.id, message.chat.id) == "administrator"):
+    if message.chat.type != "private" and not (status_user(message.from_user.id, message.chat.id) == "creator" or status_user(message.from_user.id, message.chat.id) == "administrator" or status_user(message.from_user.id, message.chat.id) == "left"):
             bot.send_message(message.chat.id, 'Налаштувати надсилання повідомлень у групу про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмінітратор</b>',parse_mode='html')
             return
     markup = types.InlineKeyboardMarkup()
@@ -133,7 +133,7 @@ def form(message):
 def callback_inline(call):
     try:
         if call.message:
-            if call.message.chat.type != "private" and not (status_user(call.from_user.id, call.message.chat.id) == "creator" or status_user(call.from_user.id, call.message.chat.id) == "administrator"):
+            if call.message.chat.type != "private" and not (status_user(call.from_user.id, call.message.chat.id) == "creator" or status_user(call.from_user.id, call.message.chat.id) == "administrator" or status_user(call.from_user.id, call.message.chat.id) == "left"):
                 bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Взаємодіяти з цим таблом може тільки автор групи або адмінітратор")
                 return
             global Info
