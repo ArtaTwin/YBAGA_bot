@@ -25,7 +25,7 @@ def chek(x):
             print("Bad connection, Telegram API does not work")
         print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
         print("program stopped to 20 seconds...")
-        sleep(20)
+        sleep(30)
         return chek(x)
 
 def color(t,alarm):
@@ -118,4 +118,4 @@ while True:
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
-    sleep(20)
+    sleep(60)
