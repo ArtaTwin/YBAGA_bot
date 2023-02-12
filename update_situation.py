@@ -14,19 +14,25 @@ bot = TeleBot(secret.TOKEN)
 inactive_users = set()
 
 def chek(x):
-    #False if ok
-    try:
-        return urlopen(f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={x}').read(12) != b'{"alarms":[]'
-    except Exception as e:
-        var = format_exc()
+    time_sleep = 40
+    while True:
         try:
-            bot.send_message(965712322, datetime.now().strftime("%x %X")+"\nError:"+str(e)+"\n\n var:"+var)
-        except Exception:
-            print("Bad connection, Telegram API does not work")
-        print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
-        print("program stopped to 20 seconds...")
-        sleep(30)
-        return chek(x)
+            return urlopen(f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={x}').read(12) != b'{"alarms":[]'
+        except Exception as e:
+            var = format_exc()
+            try:
+                bot.send_message(965712322, f"{datetime.now().strftime('%x %X')}\nError:{e}\n\nvar:{var}")
+            except Exception:
+                print("Bad connection, Telegram API does not work")
+            print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
+            print("program stopped to 20 seconds...")
+            if str(e) == '<urlopen error [Errno 16] Device or resource busy>':
+                sleep(time_sleep)
+                time_sleep += 5
+                bot.send_message(965712322, "erorr(<urlopen error [Errno 16] Device or resource busy>) is done")
+            else:
+                time_sleep = 40
+            sleep(20)
 
 def color(t,alarm):
     score = (int(time())-t)//7200 #one score is two hours. score = [0;2]
@@ -106,16 +112,15 @@ while True:
             del Info
 
             bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
-
+            sleep(10)
+        else:
+            sleep(20)
         #clearing RAM
         del gb_lists
     except Exception as e1:
-        print(e1)
         var = format_exc()
-        print(var)
         try:
-            bot.send_message(965712322, str(e1)+"\n\n"+var)
+            bot.send_message(965712322, f"{datetime.now().strftime('%x %X')}\nError:{e1}\n\nvar:{var}")
         except Exception as e2:
             print("Bad connection, Telegram API does not work")
             print(e2)
-    sleep(60)
