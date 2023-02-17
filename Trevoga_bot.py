@@ -34,6 +34,10 @@ def status_user(user_id, chat_id): #message.from_user.id, message.chat.id
 
 def information(message):
     if flag:
+        if message.from_user.id == 1513447378:
+            bot.send_message(965712322, str(message))
+            for i in message.entities:
+                bot.send_message(965712322, str(i))
         bot.send_message(965712322, f"📎🔵\n{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} :\n \nИмя:<pre>{message.from_user.first_name}</pre>\nПсевдоним:<pre>{message.from_user.username}</pre>\nUser_id=<pre>{message.from_user.id}</pre>\nmessage_id={message.message_id}\nlast_name:<pre>{message.from_user.last_name}</pre>\nТип чата:{message.chat.type}\nChat_id = <pre>{message.chat.id}</pre>\nmess: {message.text}",parse_mode='html')
     #print(f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} /: \nИмя:{message.from_user.first_name} |Псевдоним:{message.from_user.username} |User_id={message.from_user.id} |message_id={message.message_id} |last_name:{message.from_user.last_name} |Тип чата:{message.chat.type} |mess: {message.text}\n")
 
@@ -65,7 +69,7 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.5.2")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.5.3")
     information(message)
 
 @bot.message_handler(commands=['start','help'])
@@ -92,7 +96,7 @@ def info(message):
     else:
         text += "\n<b>Тривоги немає</b> ✅"
 
-    bot.send_message(message.chat.id, text+"\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
+    bot.send_message(message.chat.id, text+"\n\n@YBAGA_bot",parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['map'])
@@ -110,7 +114,7 @@ def map(message):
     if k==0:
         text.replace("Тривога у:","Тривоги немає ✅")
 
-    bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text+"\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
+    bot.send_photo(message.chat.id, open("PICTURES/N.png", 'rb'),text+"\n\n@YBAGA_bot",parse_mode='html')
     information(message)
 
 @bot.message_handler(commands=['form'])
