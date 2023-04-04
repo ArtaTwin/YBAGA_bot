@@ -30,7 +30,7 @@ def chek(x):
             if str(e) == '<urlopen error [Errno 16] Device or resource busy>' or str(e) == 'HTTP Error 504: Gateway Time-out':
                 sleep(time_sleep)
                 time_sleep += 5
-                bot.send_message(965712322, f"{datetime.now().strftime("%x %X")}\nerorr completed")
+                bot.send_message(965712322, f"{datetime.now().strftime('%x %X')}\nerorr completed")
             else:
                 time_sleep = 40
             sleep(20)
