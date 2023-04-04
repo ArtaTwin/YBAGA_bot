@@ -7,8 +7,8 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
-sleep(20)
 
+sleep(10)
 print("update_situatiaon.py started")
 
 bot = TeleBot(secret.TOKEN)
@@ -27,7 +27,7 @@ def chek(x):
                 print("Bad connection, Telegram API does not work")
             print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
             print("program stopped to 20 seconds...")
-            if str(e) == '<urlopen error [Errno 16] Device or resource busy>':
+            if str(e) == '<urlopen error [Errno 16] Device or resource busy>' or str(e) = 'HTTP Error 504: Gateway Time-out':
                 sleep(time_sleep)
                 time_sleep += 5
                 bot.send_message(965712322, "erorr(<urlopen error [Errno 16] Device or resource busy>) is done")
