@@ -7,6 +7,7 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
+sleep(20)
 
 print("update_situatiaon.py started")
 
@@ -112,7 +113,7 @@ while True:
             del Info
 
             bot.send_message(965712322, f"🔴 <pre>len : {len(inactive_users)}</pre>\n\n {inactive_users}",parse_mode='html')
-            sleep(10)
+            sleep(15)
         else:
             sleep(20)
         #clearing RAM
