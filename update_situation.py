@@ -26,7 +26,6 @@ def chek(x):
             except Exception:
                 print("Bad connection, Telegram API does not work")
             print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
-            print("program stopped to 20 seconds...")
             if str(e) == '<urlopen error [Errno 16] Device or resource busy>' or str(e) == 'HTTP Error 504: Gateway Time-out' or str(e) == 'HTTP Error 403: Forbidden':
                 sleep(time_sleep)
                 time_sleep += 5
@@ -79,6 +78,7 @@ while True:
 
         maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
+        image = image.resize((1,1))
         try:
             image.save("PICTURES/N.png")
         except Exception as e:
