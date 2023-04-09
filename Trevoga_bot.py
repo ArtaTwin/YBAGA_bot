@@ -107,7 +107,7 @@ def info(message):
 
 @bot.message_handler(commands=['map'])
 def map(message):
-    bot.send_message(message.chat.id, "Тимчасово не працює.\nАльтернатива - /info")
+    bot.send_message(message.chat.id, "Тимчасово не працює.\nАльтернативний текст - /info\nАлтернативна мапа - https://alerts.in.ua/")
     return
     #loaded_situation
     loaded = load(open('JSONs/new_situation.json' , "rb"))
