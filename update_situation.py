@@ -8,7 +8,7 @@ from telebot        import TeleBot
 from traceback      import format_exc
 import secret
 
-sleep(10)
+sleep(5)
 print("update_situatiaon.py started")
 
 bot = TeleBot(secret.TOKEN)
@@ -79,7 +79,11 @@ while True:
 
         maket = Image.open('PICTURES/L.png')
         image.paste(maket, (0, 0), maket)
-        image.save("PICTURES/N.png")
+        try:
+            image.save("PICTURES/N.png")
+        except Exception as e:
+            var = format_exc()
+            bot.send_message(965712322, f"{datetime.now().strftime('%x %X')}\nError:{e}\n\nvar:{var}")
 
         #clearing RAM
         del image, pixlist, maket, statsM_x, chek_x, x
