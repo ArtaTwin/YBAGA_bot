@@ -69,7 +69,7 @@ def InfoFile(message):
 @bot.message_handler(commands=['test','t','ping','p'])
 def testing(message):
     now = time()
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.5.8 C")
+    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(now-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.5.8 aC")
     information(message)
 
 #stiker
@@ -107,8 +107,6 @@ def info(message):
 
 @bot.message_handler(commands=['map'])
 def map(message):
-    bot.send_message(message.chat.id, "Тимчасово не працює.\nАльтернативний текст - /info\nАлтернативна мапа - https://alerts.in.ua/")
-    return
     #loaded_situation
     loaded = load(open('JSONs/new_situation.json' , "rb"))
     text=f"Станом на {loaded['data']} за Києвом\n\nТривога у:\n"

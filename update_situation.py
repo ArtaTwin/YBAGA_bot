@@ -64,8 +64,8 @@ while True:
             'Вінницькій області', 'Волинській області', 'Дніпропетровські області', 'Донецькій області', 'Житомирській області', 'Закарпатській області', 'Запорізькій області', 'Івано-Франківській області', 'Київській області', 'Кіровоградській області', 'Луганській області', 'Львівській області', 'Миколаївській області', 'Одеській області', 'Полтавській області', 'Рівненській області', 'Сумській області', 'Тернопільській області', 'Харківській області', 'Херсонській області', 'Хмельницькій області', 'Черкаській області', 'Чернівецькій області', 'Чернігівській області', 'м. Києві'
             ]]
 
-        #image = Image.open("PICTURES/O.png").convert('RGB')
-        #pixlist = image.load()
+        image = Image.open("PICTURES/O.png").convert('RGB')
+        pixlist = image.load()
         gb_lists = ( [], [] ) #good + bad lists = ( [good], [bad] )
 
         for x, statsM_x in enumerate(load(open('JSONs/stats-M.json' , "rb"))):
@@ -74,13 +74,14 @@ while True:
                 gb_lists[chek_x].append(statsM_x["stateName"])
                 situation[x]["alarm"] = chek_x
                 situation[x]["data"] = int(time())
-            #draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
+            draw(color(situation[x]["data"], chek_x), statsM_x["coordinat"])
 
-        #PICTURES -> crutch
+        maket = Image.open('PICTURES/L.png')
+        image.paste(maket, (0, 0), maket)
+        image.save("PICTURES/N.png")
 
         #clearing RAM
-        #del image, pixlist, maket,
-        del statsM_x, chek_x, x
+        del image, pixlist, maket, statsM_x, chek_x, x
 
         #save
         with open('JSONs/new_situation.json', 'w') as f:
