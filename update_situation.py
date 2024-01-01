@@ -78,22 +78,29 @@ while True:
             for state in good_list: #good
                 for user_id in users[state]:
                     try:
-                        bot.send_message(user_id, f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>{stat}</b> відбій тривоги ✅', parse_mode='html')
+                        bot.send_message(user_id, f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>{state}</b> відбій тривоги ✅', parse_mode='html')
                     except Exception as e:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
+                        else:
+                            print(str(e))
+                            bot.send_message(secret.ADMIN_ID, str(e))
 
             if len(bad_list) > 12:
                 add = "\nМожливі пуски ракет з МіГ-31К"
             else:
                 add = str()
+
             for state in bad_list: #bad
                 for user_id in users[state]:
                     try:
-                        bot.send_message(user_id, f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У {stat} розпочалася тривога </b> 🚨'+add,parse_mode='html')
+                        bot.send_message(user_id, f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У {state} розпочалася тривога </b> 🚨'+add,parse_mode='html')
                     except Exception as e:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
+                        else:
+                            print(str(e))
+                            bot.send_message(secret.ADMIN_ID, str(e))
             #clearing RAM
             del users, good_list, bad_list
 
