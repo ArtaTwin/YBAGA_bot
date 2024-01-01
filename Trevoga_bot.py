@@ -24,6 +24,8 @@ try:
     subscribers = load(open("data/users.json", "rb"))
 except Exception as e:
     bot.send_message(secret.ADMIN_ID, "subscribers error\n"+str(e))
+    for file in os.listdir("data"):
+        bot.send_document(secret.ADMIN_ID, open('data/'+a,'rb'))
 
 try:
     ban_list = load(open("data/ban_list.json", "rb"))
