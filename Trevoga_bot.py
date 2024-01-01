@@ -7,18 +7,8 @@ from threading import Thread
 from time      import time, sleep
 from os        import path
 from random    import randint
-<<<<<<< HEAD
-=======
-bot = TeleBot(secret.TOKEN)
-try:
-    from migrations import migration_3_renaming, migration_4_situation_edit, migration_5_banlist_creat
-except Exception as e:
-    bot.send_message(secret.ADMIN_ID, f"{e}\n\n{repr(e)}")
-
->>>>>>> 2235c2b884219ab23535b1de360648b3447c6cc0
 import secret
 
-<<<<<<< HEAD
 bot = TeleBot(secret.TOKEN)
 try:
     from migrations import migration_3_renaming, migration_4_situation_edit, migration_5_banlist_creat
@@ -26,9 +16,6 @@ except Exception as e:
     bot.send_message(secret.ADMIN_ID, f"{e}\n\n{repr(e)}")
 
 print("Trevoga_bot.py started")
-
-=======
->>>>>>> 2235c2b884219ab23535b1de360648b3447c6cc0
 #bot = TeleBot(secret.TOKEN)
 security_level = 1
 subscribers = load(open("data/users.json", "rb"))
