@@ -7,6 +7,7 @@ if __name__ == "__main__":
 if os.path.exists('JSONs'):
     os.renames('JSONs/Info.json', 'data/users.json')
     os.renames('JSONs/new_situation.json', 'data/situation.json')
+    #os.remove("JSONs")
     print("migration 3 done")
 
 elif os.path.exists('data'):

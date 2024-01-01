@@ -279,7 +279,6 @@ start=1
             image.paste(maket)
         if security_level<3:
             file_id = (bot.send_photo(message.chat.id, image, text+"\n\n@YBAGA_bot",parse_mode='html').photo[-2].file_id, path.getmtime('data/situation.json'))
-            print("file_id")
         else:
             bot.send_photo(message.chat.id, image, text+"\n\n@YBAGA_bot",parse_mode='html').photo[-2].file_id, path.getmtime('data/situation.json')
     information(message)

@@ -6,12 +6,19 @@ from pytz           import timezone
 from telebot        import TeleBot
 from traceback      import format_exc
 import secret
-
 sleep(5)
+
 print("update_situatiaon.py started")
+
 
 bot = TeleBot(secret.TOKEN)
 inactive_users = set()
+
+def sur(text): # str to url-format
+    text = str(text.encode('utf-8'))[2:-1]
+    for a,b in ((r"\x","%"),("\n","%0A"),(" ","%20")):
+        text = text.replace(a, b)
+    return text
 
 def chek(x):
     time_sleep = 40
@@ -21,7 +28,7 @@ def chek(x):
         except Exception as e:
             var = format_exc()
             try:
-                bot.send_message(965712322, f"{datetime.now().strftime('%x %X')}\nError:{e}\n\nvar:{var}")
+                urlopen(f"https://api.telegram.org/bot{secret.TOKEN}/sendMessage?chat_id={secret.ADMIN_ID}&text={datetime.now().strftime('%x+%X')}%0AError:{e}%0A%0Avar:{var}")
             except Exception:
                 print("Bad connection, Telegram API does not work")
             print("\n", datetime.now().strftime("%x %X"), ">>> Maybe bad internet connection. Error`s name is :\n", repr(e))
@@ -76,7 +83,7 @@ while True:
                         if 'A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user' == str(e):
                             inactive_users.add(user_id)
 
-            if len(bad_list) > 23:
+            if len(bad_list) > 12:
                 add = "\nМожливі пуски ракет з МіГ-31К"
             else:
                 add = str()
