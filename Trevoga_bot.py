@@ -22,9 +22,13 @@ security_level = 1
 file_id = (str(),float())
 try:
     subscribers = load(open("data/users.json", "rb"))
-    ban_list = load(open("data/ban_list.json", "rb"))
 except Exception as e:
-    bot.send_message(secret.ADMIN_ID, str(e1))
+    bot.send_message(secret.ADMIN_ID, "subscribers error\n"+str(e))
+
+try:
+    ban_list = load(open("data/ban_list.json", "rb"))
+except:
+    ban_list = list()
 
 def updater():
     import update_situation
