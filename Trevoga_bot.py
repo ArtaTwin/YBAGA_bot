@@ -18,9 +18,12 @@ except Exception as e:
 print("Trevoga_bot.py started")
 #bot = TeleBot(secret.TOKEN)
 security_level = 1
-subscribers = load(open("data/users.json", "rb"))
-ban_list = load(open("data/ban_list.json", "rb"))
 file_id = (str(),float())
+try:
+    subscribers = load(open("data/users.json", "rb"))
+    ban_list = load(open("data/ban_list.json", "rb"))
+except Exception as e:
+    bot.send_message(secret.ADMIN_ID, str(e1))
 
 def updater():
     import update_situation
