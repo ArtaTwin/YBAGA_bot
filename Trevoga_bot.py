@@ -12,7 +12,7 @@ import secret
 bot = TeleBot(secret.TOKEN)
 bot.send_message(secret.ADMIN_ID, "Trevoga_bot.py started")
 try:
-    from migrations import migration_3_renaming, migration_4_situation_edit, migration_5_banlist_creat
+    from migrations import migration_3_renaming, migration_4_situation_edit, migration_5_banlist_creat, migration_6_reformation_situation
 except Exception as e:
     bot.send_message(secret.ADMIN_ID, f"{e}\n\n{repr(e)}")
 
