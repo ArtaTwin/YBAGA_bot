@@ -9,23 +9,17 @@ from os        import path
 from random    import randint
 import secret
 
+print("Trevoga_bot.py started")
+
 bot = TeleBot(secret.TOKEN)
 bot.send_message(secret.ADMIN_ID, "Trevoga_bot.py started")
-try:
-    from migrations import migration_3_renaming, migration_4_situation_edit, migration_5_banlist_creat, migration_6_reformation_situation
-except Exception as e:
-    bot.send_message(secret.ADMIN_ID, f"{e}\n\n{repr(e)}")
 
-print("Trevoga_bot.py started")
-#bot = TeleBot(secret.TOKEN)
 security_level = 1
 file_id = (str(),float())
 try:
     subscribers = load(open("data/users.json", "rb"))
 except Exception as e:
     bot.send_message(secret.ADMIN_ID, "subscribers error\n"+str(e))
-    for file in os.listdir("data"):
-        bot.send_document(secret.ADMIN_ID, open('data/'+a,'rb'))
 
 try:
     ban_list = load(open("data/ban_list.json", "rb"))
@@ -73,8 +67,6 @@ def stenography_img(num):
         for i in range(3-len(pal)%3):
             pal.append(20)
 
-    print(len(pal))
-    print(pal)
     maket = Image.new("P", (5 * len(pal)//3,2)) #color=(255,100,255)
     maket.putpalette(pal)
     pixlist = maket.load()
@@ -198,19 +190,16 @@ def dc(message):
         b, id =decoder( message.text[4:] )
         bot.send_message(message.chat.id, f"bin: <pre>{b}</pre>\nid: <pre>{id}</pre>", parse_mode='html')
 
-#testing
-@bot.message_handler(commands=['test','t','ping','p'])
+@bot.message_handler(commands=['test','t','ping','p']) #testing
 def testing(message):
-    bot.send_message(message.chat.id, f"{'pong' if message.text.find('t') == -1 else 'tost'}\nзатримка: {round(time()-message.date,2)} сек\nваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}\n версія: 4.6.0")
+    bot.send_message(message.chat.id, f"""
+{'pong' if message.text.find('t') == -1 else 'tost'}
+затримка: {round(time()-message.date,2)} сек
+ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
+версія: 4.6.0+""")
     information(message)
 
-@bot.message_handler(commands=['situation'])
-def sit(message):
-    if message.from_user.id==secret.ADMIN_ID:
-        for file in os.listdir("data"):
-            bot.send_document(secret.ADMIN_ID, open('data/'+a,'rb'))
-#stiker
-@bot.message_handler(commands=['s'])
+@bot.message_handler(commands=['s']) #stiker
 def stiker(message):
     bot.send_sticker(message.chat.id , open('static/map.png' , "rb"))
     information(message)
