@@ -5,9 +5,10 @@ if __name__ == "__main__":
     os.chdir('..')
 
 if os.path.exists('JSONs'):
-    os.renames('JSONs/Info.json', 'data/users.json')
-    os.renames('JSONs/new_situation.json', 'data/situation.json')
-    #os.remove("JSONs")
+    if "Info.json" in os.listdir("JSONs"):
+        os.renames('JSONs/Info.json', 'data/users.json')
+    if "new_situation.json" in os.listdir("JSONs"):
+        os.renames('JSONs/new_situation.json', 'data/situation.json')
     print("migration 3 done")
 
 elif os.path.exists('data'):
