@@ -157,7 +157,7 @@ while True:
             state_situation["alarm"] = alarm_state
             state_situation["date"] = int(time.time())
             if alarm_state:
-                bad_list.aalarm_stateppend(state["Name"])
+                bad_list.append(state["Name"])
             else:
                 good_list.append(state["Name"])
 
