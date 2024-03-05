@@ -11,7 +11,6 @@ from pytz      import timezone
 from telebot   import TeleBot, types, apihelper
 
 import secret
-from migrations import migration_7_edit_data
 
 def updater():
     import update_situation
@@ -94,6 +93,7 @@ def decoder(text):
 
 def markup_generator(sub_id):
     markup = types.InlineKeyboardMarkup()
+    audience.reload()
     for i, SubscriptionOfSubId in enumerate(audience.getSubscriptionsSubId(sub_id)):
         state, subscription_is_available = SubscriptionOfSubId
         markup.add(
@@ -184,7 +184,10 @@ class Audience(str):
     audience: dict[state:subscribers]
     """
 
+    path = None
+
     def __init__(self, path):
+        self.path = path
         try:
             f_read = open(path, "rb")
             self.__audience  = json.load(f_read)
@@ -201,6 +204,9 @@ class Audience(str):
             }
 
             print("Audience generated without Subscribers")
+
+    def reload(self):
+        self.__init__(self.path)
 
     def addSubId(self, state, sub_id):
         if sub_id not in self.__audience[state]:
@@ -283,6 +289,7 @@ def sd(message):
 @bot.message_handler(commands=['cs']) #info of users
 def count_sub(message):
     if message.from_user.id==secret.ADMIN_ID:
+        audience.reload()
         CSI = audience.countSubId()
         bot.send_message(secret.ADMIN_ID, f"<pre>len: {len(CSI)}</pre>\n\n{CSI}", parse_mode='html')
         with open(r'data/audience.json','rb') as f:
@@ -345,7 +352,7 @@ def testing(message):
 {'tost' if "t" in message.text else 'pong'}
 затримка: {round(time.time()-message.date,2)} сек
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.7.1
+версія: 4.7.2
         """
     )
     information(message)
@@ -358,7 +365,9 @@ def stiker(message):
 
 @bot.message_handler(commands=['start', 'help'])
 def start(message):
-    bot.send_message(message.chat.id, """
+    bot.send_message(
+        message.chat.id,
+        """
 /info - Надсилаю перелік з інформацію про стан у регіонах Україні
 /map - Надсилаю мапу тривог України
 /form - Налаштування надсилання повідомлень про початок або відбій тривоги
@@ -366,7 +375,9 @@ def start(message):
 
 <b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>
 <a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>""",
-    parse_mode='html')
+        parse_mode='html',
+        disable_web_page_preview= True
+    )
     information(message)
 
 @bot.message_handler(commands=['info', 'i'])
