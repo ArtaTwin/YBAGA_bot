@@ -1,49 +1,34 @@
-from telebot   import TeleBot, types
-from json      import load, dump
-from PIL       import Image
+import json
+import random
+import time
+import traceback
 from datetime  import datetime
-from pytz      import timezone
+from pathlib   import Path
 from threading import Thread
-from time      import time, sleep
-from os        import path
-from random    import randint
+
+from PIL       import Image
+from pytz      import timezone
+from telebot   import TeleBot, types, apihelper
+
 import secret
-
-print("Trevoga_bot.py started")
-
-bot = TeleBot(secret.TOKEN)
-bot.send_message(secret.ADMIN_ID, "Trevoga_bot.py started")
-
-security_level = 1
-file_id = (str(),float())
-try:
-    subscribers = load(open("data/users.json", "rb"))
-except Exception as e:
-    bot.send_message(secret.ADMIN_ID, "subscribers error\n"+str(e))
-
-try:
-    ban_list = load(open("data/ban_list.json", "rb"))
-except:
-    ban_list = list()
+from migrations import migration_7_edit_data
 
 def updater():
     import update_situation
-Thread(target=updater, args=(), daemon=True).start()
-del Thread, updater
 
 def timedelta(t):
-    t = time()-t
-    if t < 60:
+    t = time.time()-t
+    if t < 120:
         return " 1 хв"
-    if t < 3601:
+    elif t < 3600:
         return f" {t//60:.0f} хв"
-    if t < 86400:
+    elif t < 86400:
         return f" {t//3600:.0f} год"
-    if t > 86399:
+    else:
         return f" {t//86400:.0f} д"
 
-def color(t,alarm):
-    score = (time()-t)/7200 #one score is two hours
+def color(t, alarm):
+    score = (time.time()-t)/7200 #one score is two hours
 
     if alarm:
         if score >= 2:
@@ -61,7 +46,7 @@ def color(t,alarm):
             return (0,120,0)
 
 def stenography_img(num):
-    pal=[255 if s=="1" else 20 for s in f"{int(num):b}"]
+    pal=[255 if s=="1" else 20 for s in f"{abs(num):b}"]
 
     if len(pal)%3:
         for i in range(3-len(pal)%3):
@@ -79,7 +64,6 @@ def stenography_img(num):
 
 def stenography(text, num):
     b_list = [s == "1" for s in f"{abs(num):b}"]
-    #changes = "12345678"
     changes = "apceoixy"
     targets = "арсеоіху"
     d = dict(zip(targets,changes))
@@ -108,18 +92,176 @@ def decoder(text):
 
     return (b, int(b[::-1],2) )
 
-def customizer_chek(chat_id, user_id): #message.chat.id, message.from_user.id
-    return bot.get_chat_member(chat_id=chat_id, user_id=user_id).status in ["creator", "administrator", "left"]
+def markup_generator(sub_id):
+    markup = types.InlineKeyboardMarkup()
+    for i, SubscriptionOfSubId in enumerate(audience.getSubscriptionsSubId(sub_id)):
+        state, subscription_is_available = SubscriptionOfSubId
+        markup.add(
+            types.InlineKeyboardButton(
+                state+(" ✅" if subscription_is_available else ""),
+                callback_data=str(
+                    (i, subscription_is_available, sub_id) # have to spare memory. 1-64 bytes
+                )
+            )
+        )
 
-def information(message): #for statistics
+    markup.add(types.InlineKeyboardButton("Зберегти налаштування ⚙️", callback_data=str((-1, 0, sub_id)) )) #save and close
+    return markup
+
+def get_situation(sub_id):
+    if sub_id in ban_list:
+        with open(r'static/states_info.json' , "rb") as f:
+            states_info = json.load(f)
+
+        situation = [
+            {
+                "Name"  : state["Name"],
+                "alarm" : random.randrange(2),
+                "date"  : time.time()-random.randrange(86401)
+            }
+
+            for state in tuple(states_info)
+        ]
+    else:
+        with open(r'data/situation.json' , "rb") as f:
+            situation = json.load(f)
+
+    return situation
+
+def uncustomizer_chek(chat_id, user_id):
+    if chat_id == user_id: #chat.type  == "private"
+        return False
+    else:
+        return not (
+            user_id in map(
+                lambda admin: admin.user.id,
+                bot.get_chat_administrators(chat_id)
+            )
+            or
+            user_id == 1087968824 # anonymous id = 1087968824. Additional information: https://t.me/GroupAnonymousBot
+        )
+
+def information(message):
     if security_level:
-        bot.send_message(secret.ADMIN_ID, f"📎🔵\n{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} :\n \nІм я:<pre>{message.from_user.first_name}</pre>\nПсевдонім:<pre>{message.from_user.username}</pre>\nUser_id=<pre>{message.from_user.id}</pre>\nmessage_id={message.message_id}\nlast_name:<pre>{message.from_user.last_name}</pre>\nВид чату:{message.chat.type}\nChat_id = <pre>{message.chat.id}</pre>\nmess: {message.text}",parse_mode='html')
-    #print(f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')} /: \nИмя:{message.from_user.first_name} |Псевдоним:{message.from_user.username} |User_id={message.from_user.id} |message_id={message.message_id} |last_name:{message.from_user.last_name} |Тип чата:{message.chat.type} |mess: {message.text}\n")
+        bot.send_message(secret.ADMIN_ID, f"""
+🔵 {datetime.fromtimestamp(message.date).strftime('%d/%m/%Y %H:%M:%S')}
+
+Ім я: <pre>{message.from_user.first_name}</pre>
+Псевдонім: <pre>{message.from_user.username}</pre>
+User_id= <pre>{message.from_user.id}</pre>
+message_id= {message.message_id}\nlast_name:<pre>{message.from_user.last_name}</pre>
+Вид чату: {message.chat.type}\nChat_id = <pre>{message.chat.id}</pre>
+text: {message.text}
+""",parse_mode='html')
+
+def report_error(RE): #RE = repr(exception)
+    FE = traceback.format_exc()
+    print(
+datetime.now().strftime('\t %x %X'),
+"Format exception:",
+FE,
+"Repr exception:",
+RE,
+sep="\n", end="\n"*3)
+
+    bot.send_message(secret.ADMIN_ID, f"""
+❗️ {datetime.now().strftime('%x %X')}
+*ERROR* :
+__Format exception__ :
+```{FE}```
+
+__Repr exception__ :
+```{RE}```
+""",
+parse_mode='MarkdownV2')
+    time.sleep(1)
+
+class Audience(str):
+    """
+    state: str
+    sub_id: int
+    subscribers: list[sub_id]
+    audience: dict[state:subscribers]
+    """
+
+    def __init__(self, path):
+        try:
+            f_read = open(path, "rb")
+            self.__audience  = json.load(f_read)
+            f_read.close()
+        except Exception as e:
+            report_error(repr(e))
+
+            with open(r'static/states_info.json','rb') as f:
+                states_info = json.load(f)
+
+            self.__audience = {
+                state["Name"] : list()
+                for state in states_info
+            }
+
+            print("Audience generated without Subscribers")
+
+    def addSubId(self, state, sub_id):
+        if sub_id not in self.__audience[state]:
+            self.__audience[state].append(sub_id)
+
+    def delSubId(self, state, sub_id):
+        if sub_id in self.__audience[state]:
+            self.__audience[state].remove(sub_id)
+
+    def countSubId(self):
+        return {
+            sub_id
+            for subscribers in self.__audience.values()
+            for sub_id in subscribers
+        }
+
+    def findSubId(self, sub_id):
+        return [
+            state
+            for state, subscribers in self.__audience.items()
+            if sub_id in subscribers
+        ]
+
+    def getSubscriptionsSubId(self, sub_id): #get list of subscriptions of SubId
+        return [
+            (state, sub_id in subscribers)
+            for state, subscribers in self.__audience.items()
+        ]
+
+    def save(self, path):
+        try:
+            f_write = open(path, 'w')
+            json.dump(self.__audience, f_write)
+            f_write.close()
+        except Exception as e:
+            report_error(repr(e))
+
+bot = TeleBot(secret.TOKEN)
+
+security_level = 1
+fi_vt = (str(),float()) #file_id, version_time
+
+audience = Audience(r"data/audience.json")
+with open(r"data/ban_list.json", "rb") as f:
+    try:
+        ban_list = json.load(f)
+    except Exception as e:
+        report_error(repr(e))
+        ban_list = list()
+
+Thread(target=updater, args=(), daemon=True).start()
+bot.send_message(secret.ADMIN_ID, "Trevoga_bot.py started")
+print("Trevoga_bot.py started")
 
 @bot.message_handler(commands=['restart', 'r'])
 def restart(message):
     if message.from_user.id==secret.ADMIN_ID or message.chat.id==552733968:
-        bot.send_message(message.chat.id,f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')}\n Bot start to restart")
+        bot.send_message(
+            message.chat.id,
+            f"{datetime.fromtimestamp(message.date).strftime('%d.%m.%Y %H:%M:%S')}\n Bot start to restart"
+        )
         #This forces telebot to crash exit. It will be restarted by service script. We tried exit(1), KeyboardInterrup, but they don't work as good as 1/0
         1/0
 
@@ -138,222 +280,288 @@ def sd(message):
             security_level-=1
         bot.send_message(message.chat.id, f"less safe\nsecurity_level: <pre>{security_level}</pre>", parse_mode='html')
 
-@bot.message_handler(commands=['iu']) #info of users
-def inactive_users(message):
+@bot.message_handler(commands=['cs']) #info of users
+def count_sub(message):
     if message.from_user.id==secret.ADMIN_ID:
-        s = set()
-        for x in subscribers.values():
-            for i in x:
-                s.add(i)
-        bot.send_message(secret.ADMIN_ID, f"<pre>len: {len(s)}</pre>\n\n{s}", parse_mode='html')
-        del s
-        bot.send_document(secret.ADMIN_ID, open('data/users.json','rb'))
+        CSI = audience.countSubId()
+        bot.send_message(secret.ADMIN_ID, f"<pre>len: {len(CSI)}</pre>\n\n{CSI}", parse_mode='html')
+        with open(r'data/audience.json','rb') as f:
+            bot.send_document(secret.ADMIN_ID, f)
 
-@bot.message_handler(commands=['ban'])
+@bot.message_handler(commands=['ban', 'b'])
 def ban_user(message):
     if message.from_user.id==secret.ADMIN_ID:
-        id = message.text[5:]
+        id = message.text[message.text.find("\n"):]
         try:
             id = int(id)
         except ValueError:
             bot.send_message(message.chat.id, "id is not correct\n"+id)
-        if not id in ban_list:
+        if id not in ban_list:
             ban_list.append(id)
-            dump(ban_list, open('data/ban_list.json', 'w'))
+            with open('data/ban_list.json', 'w') as f:
+                json.dump(ban_list, f)
         bot.send_message(message.chat.id, f"user banned\n<pre>{id}</pre>", parse_mode='html')
 
-@bot.message_handler(commands=['unban'])
+@bot.message_handler(commands=['unban', 'ub'])
 def unban_user(message):
     if message.from_user.id==secret.ADMIN_ID:
-        id = message.text[7:]
+        id = message.text[message.text.find("\n"):]
         try:
             id = int(id)
         except ValueError:
             bot.send_message(message.chat.id, "id is not correct\n"+id)
+
         try:
             ban_list.remove(id)
         except ValueError:
             bot.send_message(message.chat.id, "id not found\n"+str(id))
             return
-        dump(ban_list, open('data/ban_list.json', 'w'))
+
+        with open('data/ban_list.json', 'w') as f:
+            json.dump(ban_list, f)
+
         bot.send_message(message.chat.id, f"user unbanned\n<pre>{id}</pre>", parse_mode='html')
 
 @bot.message_handler(commands=['sbl']) #send ban_list
 def sbl(message):
     if message.from_user.id==secret.ADMIN_ID:
         bot.send_message(message.chat.id, f"<pre>len: {len(ban_list)}</pre>\n\n{ban_list}", parse_mode='html')
-        bot.send_document(message.chat.id, open('data/ban_list.json','rb'))
 
-@bot.message_handler(commands=['dc']) #decoder
+        with open('data/ban_list.json','rb') as f:
+            bot.send_document(message.chat.id, f)
+
+@bot.message_handler(commands=['decoder', 'dc'])
 def dc(message):
     if message.from_user.id==secret.ADMIN_ID:
-        b, id =decoder( message.text[4:] )
-        bot.send_message(message.chat.id, f"bin: <pre>{b}</pre>\nid: <pre>{id}</pre>", parse_mode='html')
+        bin, id =decoder(
+            message.text[message.text.find("\n"):]
+        )
+        bot.send_message(message.chat.id, f"bin: <pre>{bin}</pre>\nid: <pre>{id}</pre>", parse_mode='html')
 
 @bot.message_handler(commands=['test','t','ping','p']) #testing
 def testing(message):
-    bot.send_message(message.chat.id, f"""
-{'pong' if message.text.find('t') == -1 else 'tost'}
-затримка: {round(time()-message.date,2)} сек
+    bot.send_message(message.chat.id,
+        f"""
+{'tost' if "t" in message.text else 'pong'}
+затримка: {round(time.time()-message.date,2)} сек
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.6.0+""")
+версія: 4.7.0
+        """
+    )
     information(message)
 
-@bot.message_handler(commands=['s']) #stiker
+@bot.message_handler(commands=['stiker', 's'])
 def stiker(message):
-    bot.send_sticker(message.chat.id , open('static/map.png' , "rb"))
+    with open('static/map.png' , "rb") as f:
+        bot.send_sticker(message.chat.id , f)
     information(message)
 
-@bot.message_handler(commands=['start','help'])
+@bot.message_handler(commands=['start', 'help'])
 def start(message):
-    bot.send_message(message.chat.id, "/info - Надсилаю перелік з інформацію про стан у регіонах Україні\n/map - Надсилаю мапу тривог України\n/form - Налаштування надсилання повідомлень про початок або відбій тривоги\n\n<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>\n<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>",parse_mode='html')
+    bot.send_message(message.chat.id, """
+/info - Надсилаю перелік з інформацію про стан у регіонах Україні
+/map - Надсилаю мапу тривог України
+/form - Налаштування надсилання повідомлень про початок або відбій тривоги
+<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>
+
+<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>
+<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>""",
+    parse_mode='html')
     information(message)
 
-@bot.message_handler(commands=['info'])
+@bot.message_handler(commands=['info', 'i'])
 def info(message):
-    #situation_situation
-    situation = load(open('data/situation.json' , "rb"))
-    if message.from_user.id in ban_list or message.chat.id in ban_list:
-        situation = [{"Name" : x["Name"], "alarm" : randint(0,1), "data" : time()-randint(0,86400)} for x in situation]
-    text = f"Станом на {datetime.fromtimestamp(path.getmtime('data/situation.json'), tz=timezone('Europe/Kiev')).strftime('%d.%m %H:%M')} за Києвом\n\nСитуація у: \n"
-    statistic = 0
+    date= datetime.fromtimestamp(
+        Path(r'data/situation.json').lstat().st_mtime,
+        tz=timezone('Europe/Kiev')
+    )
+    text= f"Станом на {date.strftime('%d.%m %H:%M')} за Києвом\n\nСитуація у: \n"
+    alarm = bool()
 
-    #[(f"{k}. <b>{x['Name']}</b> - 🚨" if x["alarm"] else f"{k}. {x['Name']} - ✅") + timedelta(x['data']) for k, x in enumerate(situation, start=1)]
-
-    for k, x in enumerate(situation, start=1):
-        if x["alarm"]:
-            statistic+=4
-            text += f"{k}. <b>{x['Name']}</b> - 🚨"
+    for i, state in enumerate(get_situation(message.from_user.id), start=1):
+        if state["alarm"]:
+            text+= f"\n{i}. <b>{state['Name']}</b> - 🚨"
+            alarm= True
         else:
-            text += f"{k}. {x['Name']} - ✅"
-        text += timedelta(x['data'])+"\n"
-    if statistic:
-        text += f"\nНа {statistic}% території України оголошено тривогу!"
-    else:
-        text += "\n<b>Тривоги немає</b> ✅"
+            text+= f"\n{i}. {state['Name']} - ✅"
+        text+= timedelta(state['date'])
 
-    bot.send_message(message.chat.id, (stenography(text, message.from_user.id) if security_level else text) +"\n\n@YBAGA_bot",parse_mode='html')
+    if alarm:
+        text+= f'\n\nНа {text.count("🚨")*4}% території України оголошено тривогу!'
+    else:
+        text+= "\n\n<b>Тривоги немає</b> ✅"
+
+    if security_level:
+        text= stenography(text, message.from_user.id)
+
+    text+= "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
+
+    bot.send_message(message.chat.id, text, parse_mode='html')
     information(message)
 
-@bot.message_handler(commands=['map'])
-def map(message):
-    situation = load(open('data/situation.json' , "rb"))
-    if message.from_user.id in ban_list or message.chat.id in ban_list:
-        situation = [{"Name" : x["Name"], "alarm" : randint(0,1), "data" : time()-randint(0,86400)} for x in situation]
-    text=f"""
-Станом на {datetime.fromtimestamp(path.getmtime('data/situation.json'), tz=timezone('Europe/Kiev')).strftime('%d.%m %H:%M')} за Києвом
+@bot.message_handler(commands=['map', 'm'])
+def photo(message):
+    situation = get_situation(message.from_user.id)
+    situation_mtime= Path(r'data/situation.json').lstat().st_mtime
 
-Тривога у:
-"""+"\n".join(
-[f"{k}. {x['Name']}" for k, x in enumerate(
-filter((lambda a: a["alarm"]), situation),
-start=1
-)]
-)
+    text= f"Станом на {datetime.fromtimestamp(situation_mtime, tz=timezone('Europe/Kiev')).strftime('%d.%m %H:%M')} за Києвом\n\n"
+    iterator = enumerate(
+        filter(
+            (lambda x: x["alarm"]),
+            situation
+        ),
+        start=1
+    )
 
-    if text[-1] == '\n':
-        text = text.replace("Тривога у:","Тривоги немає ✅")
-
-    global file_id
-    if file_id[-1] == path.getmtime('data/situation.json') and not (message.from_user.id in ban_list or message.chat.id in ban_list) and security_level<3:
-        bot.send_photo(message.chat.id, file_id[0] ,text+"\n@YBAGA_bot",parse_mode='html')
+    if iterator:
+        text+= "Тривога у:\n"
+        text+= "\n".join(
+            (
+                f"{i}. {state['Name']}"
+                for i, state in iterator
+            )
+        )
     else:
-        pal = list()
-        if security_level ==2:
-            maket, pal = stenography_img(time())
-        if security_level ==3:
-            maket, pal = stenography_img(message.from_user.id)
+        text+= "Тривоги немає ✅\n"
+    text+= "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
+
+    global fi_vt
+    if fi_vt[-1] == situation_mtime and message.from_user.id not in ban_list and security_level<3:
+        bot.send_photo(message.chat.id, fi_vt[0], text+"\n@YBAGA_bot", parse_mode='html')
+    else:
+        pal = [
+            150,0,0,
+            100,0,0,
+            50,0,0,
+            0,120,0,
+            0,120,50,
+            0,120,100,
+            0,0,0,
+            30,30,30,
+            100,100,100,
+            130,130,130,
+            255,255,255
+        ]
+
+        if security_level < 2:
+            maket, stenography_pal = stenography_img(0)
+        elif security_level == 2:
+            maket, stenography_pal = stenography_img(
+                int(time.time())
+            )
+        else:
+            maket, stenography_pal = stenography_img(message.from_user.id)
 
         image = Image.open("static/map.png")
-        image.putpalette([c for x in situation for c in color(x["data"], x["alarm"])]+ [
-        150,0,0,
-        100,0,0,
-        50,0,0,
-        0,120,0,
-        0,120,50,
-        0,120,100,
-        0,0,0,
-        30,30,30,
-        100,100,100,
-        130,130,130,
-        255,255,255, #
-]+ pal)
 
-        if security_level>1:
-            image.paste(maket)
+        image.putpalette(
+            [
+                primary_color
+                for state in situation
+                for primary_color in color(state["date"], state["alarm"])
+            ]+ pal+ stenography_pal
+        )
+
+        image.paste(maket)
+
         if security_level<3:
-            file_id = (bot.send_photo(message.chat.id, image, text+"\n\n@YBAGA_bot",parse_mode='html').photo[-2].file_id, path.getmtime('data/situation.json'))
+            fi_vt = (
+                bot.send_photo(message.chat.id, image, text, parse_mode='html').photo[-2].file_id,
+                situation_mtime
+            )
         else:
-            bot.send_photo(message.chat.id, image, text+"\n\n@YBAGA_bot",parse_mode='html').photo[-2].file_id, path.getmtime('data/situation.json')
+            bot.send_photo(message.chat.id, image, text, parse_mode='html')
     information(message)
 
-@bot.message_handler(commands=['form'])
+@bot.message_handler(commands=['form', 'f'])
 def form(message):
-    if message.chat.type != "private" and not customizer_chek(message.chat.id, message.from_user.id):
-            bot.send_message(message.chat.id, 'Налаштувати надсилання повідомлень у групу про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмінітратор</b>',parse_mode='html')
-            return
-    markup = types.InlineKeyboardMarkup()
-    for stat in subscribers:
-        if message.chat.id in subscribers[stat]:
-            markup.add(types.InlineKeyboardButton(stat+" ✅",callback_data="x"+stat))
-        else:
-            markup.add(types.InlineKeyboardButton(stat,callback_data=stat))
+    if uncustomizer_chek(message.chat.id, message.from_user.id):
+        bot.send_message(message.chat.id,
+            'Налаштувати надсилання повідомлень у групу про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмініcтратор</b>. І бот повинен мати права адмінстратора',
+            parse_mode='html'
+        )
+        return
 
-    markup.add(types.InlineKeyboardButton("Згорнути перелік",callback_data="close"))
-    bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде у:', reply_markup=markup)
+    if message.reply_to_message:
+        a = message.reply_to_message.forward_from_chat
+
+        if a == None or a.type != 'channel':
+            bot.send_message(
+                message.chat.id,
+                "Налаштовувати сповіщення таким чином можна тільки для каналів\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
+                parse_mode='html'
+            )
+            return
+
+        try:
+            bot.get_chat(a.id)
+        except apihelper.ApiTelegramException:
+            bot.send_message(
+                message.chat.id,
+                "Бот не знаходится у каналі\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
+                parse_mode='html'
+            )
+            return
+
+        if uncustomizer_chek(a.id, message.from_user.id):
+            bot.send_message(
+                message.chat.id,
+                "Ви не є адмінстартором цього каналу\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
+                parse_mode='html'
+            )
+            return
+
+        bot.reply_to(
+            message.reply_to_message,
+            f'Надсилати повідомлення до каналу \'<b>{a.title}</b>\', коли тривога буде у:',
+            parse_mode='html',
+            reply_markup=markup_generator(a.id)
+        )
+    else:
+        bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде у:', reply_markup=markup_generator(message.chat.id))
     information(message)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_inline(call):
     try:
-        if call.message:
-            if call.message.chat.type != "private" and not customizer_chek(call.message.chat.id, call.from_user.id):
-                bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Взаємодіяти з цією формою може тільки автор групи або адмінітратор")
-                return
-            global subscribers
-            if call.message.chat.type != "private" :
-                sleep(0.5)
-            if call.data == 'close':
-                dump(subscribers, open('data/users.json', 'w'))
-                t = "Повідомлення будуть надходити, коли змінюватиметься ситуація у: "
-                k = 1
-                for i in subscribers:
-                    if call.message.chat.id in subscribers[i]:
-                        t += f"\n {k}. "+i
-                        k += 1
-                if k == 1:
-                    t = "Повідомлення не будуть надходити"
-                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=t, reply_markup=None)
-                return
-            elif call.data[0] == "x":
-                subscribers[call.data[1::]].remove(call.message.chat.id)
+        if uncustomizer_chek(call.message.chat.id, call.from_user.id):
+            bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Взаємодіяти з цією формою може тільки автор групи або адмінітратор")
+            time.sleep(1)
+            return
+        global audience
+
+        i, subscription_is_available, sub_id = eval(call.data)
+        if i == -1: #close
+            audience.save(r'data/audience.json')
+            afsi = audience.findSubId(sub_id) #audience find Sub Id
+
+            if afsi:
+                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                text="Повідомлення будуть надходити, коли змінюватиметься ситуація у:\n"+"\n".join([f" {k}. {state}" for k, state in enumerate(afsi,start=1)]),
+                reply_markup=None)
             else:
-                subscribers[call.data].append(call.message.chat.id)
+                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                text="Повідомлення не будуть надходити",
+                reply_markup=None)
+            return
 
-            # remove inline buttons
-            markup = types.InlineKeyboardMarkup()
-            for stat in subscribers:
-                if call.message.chat.id in subscribers[stat]:
-                    markup.add(types.InlineKeyboardButton(stat+" ✅",callback_data="x"+stat))
-                else:
-                    markup.add(types.InlineKeyboardButton(stat,callback_data=stat))
+        cmrk = call.message.reply_markup.keyboard[i][0] #OPTIMIZE: link. But I cannot create a link by cmrk.text
+        if subscription_is_available:
+            cmrk.text = state = cmrk.text[:-2]
+            audience.delSubId(cmrk.text, sub_id)
+        else:
+            audience.addSubId(cmrk.text, sub_id)
+            cmrk.text += " ✅"
 
-            markup.add(types.InlineKeyboardButton("Зберегти налаштування ⚙️",callback_data="close"))
-            #call.message.from_user.id
-            #call.message.chat.id
+        cmrk.callback_data= str(
+            (i, not subscription_is_available, sub_id)
+        )
 
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:", reply_markup=markup)
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:", reply_markup=call.message.reply_markup)
 
 
-    except Exception as e1:
-        try:
-            bot.send_message(secret.ADMIN_ID, str(e1))
-        except Exception as e2:
-            print("Bad connection, Telegram API does not work")
-            print(e2)
-            print()
-            print(str(e1))
-        bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Відбувся збій")
+    except Exception as e:
+        report_error(repr(e))
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.send_message(call.message.chat.id, 'Відбувся збій.\nПовторіть спробу, будь ласка')
 
