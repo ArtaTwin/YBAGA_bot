@@ -345,7 +345,7 @@ def testing(message):
 {'tost' if "t" in message.text else 'pong'}
 затримка: {round(time.time()-message.date,2)} сек
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.7.0
+версія: 4.7.1
         """
     )
     information(message)

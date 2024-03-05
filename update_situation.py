@@ -150,7 +150,7 @@ while True:
 
         #making of update
         t = time.time()
-        for state_situation, state in zip(situation, states_info, strict=True):
+        for state_situation, state in zip(situation, states_info):
             alarm_state = chek(state["stateId"])
             if alarm_state == state_situation["alarm"]:
                 continue
