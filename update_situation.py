@@ -107,6 +107,7 @@ class Audience(str):
             self.__audience[state].remove(sub_id)
 
     def cleenSubId(self, sub_id):
+        self.changed = True
         for state in self.__audience:
             self.delSubId(state, sub_id)
 
@@ -119,6 +120,7 @@ class Audience(str):
             f_write.close()
         except Exception as e:
             report_error(repr(e))
+        self.changed = bool()
 
 time.sleep(5)
 
@@ -149,7 +151,7 @@ while True:
         bad_list = list()
 
         #making of update
-        t = time.time()
+
         for state_situation, state in zip(situation, states_info):
             alarm_state = chek(state["stateId"])
             if alarm_state == state_situation["alarm"]:
@@ -161,7 +163,6 @@ while True:
             else:
                 good_list.append(state["Name"])
 
-        print(time.time()-t)
         with open('data/situation.json', 'w') as f:
             json.dump(situation, f)
 
