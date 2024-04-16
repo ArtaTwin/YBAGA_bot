@@ -35,6 +35,7 @@ def edit_data():
             print(f"correction of \'{audience_path}\' done")
         else:
             print(f"correction of \'{audience_path}\' completed")
+            return 0
 
         with open(audience_path,'w') as f_write:
             json.dump(audience, f_write)

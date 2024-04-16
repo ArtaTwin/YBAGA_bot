@@ -35,13 +35,25 @@ def chek(state_id):
     timeout = 10
     while True:
         try:
-            return urllib.request.urlopen(f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={state_id}').length != 13
+            # "urlopen(...).length != 13" 2*10**(-8) sec faster
+            return urllib.request.urlopen(f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={state_id}').read() != b'{"alarms":[]}'
         except Exception as e:
-            report_error(repr(e))
+
+            if timeout> 50: #total: 150
+                report_error(repr(e))
+
             e = str(e)
-            if '<urlopen error [Errno 16] Device or resource busy>' in e or 'HTTP Error 504: Gateway Time-out' in e or 'HTTP Error 403: Forbidden' in e:
-                time.sleep(timeout)
-                timeout += 10
+            tuple_exception_example = (
+                '<urlopen error [Errno 16] Device or resource busy>',
+                'HTTP Error 504: Gateway Time-out',
+                'HTTP Error 403: Forbidden'
+            )
+
+            for exception_example in tuple_exception_example:
+                if exception_example in e:
+                    time.sleep(timeout)
+                    timeout += 10
+                    break
 
 def notifications(_states, alarm):
     if alarm:
@@ -50,6 +62,9 @@ def notifications(_states, alarm):
             end += "\nМожливі пуски ракет з МіГ-31К"
     else:
         start, end = f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>', '</b> відбій тривоги ✅'
+
+    if int(time.time())%3 == 0: #random
+        end += "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
 
     for state in _states:
         text = start+state+end
@@ -69,7 +84,10 @@ def notifications(_states, alarm):
                         bot.send_message(secret.ADMIN_ID, f"id removed <pre>{sub_id}</pre>", parse_mode='html')
                         break
                 else:
+                    bot.send_message(secret.ADMIN_ID, f"sub_id was <pre>{sub_id}</pre>", parse_mode='html')
                     report_error(repr(e))
+                    if 0 > sub_id:
+                        bot.leave_chat(sub_id)
 
 class Audience(str):
     """
@@ -120,7 +138,7 @@ class Audience(str):
             f_write.close()
         except Exception as e:
             report_error(repr(e))
-        self.changed = bool()
+        self.changed = False
 
 time.sleep(5)
 
@@ -128,61 +146,55 @@ bot = TeleBot(secret.TOKEN)
 print("update_situatiaon.py started")
 
 while True:
+    #initialization
+    with open('static/states_info.json' , "rb") as f:
+        states_info = tuple(json.load(f))
+
     try:
-        #initialization
-        with open('static/states_info.json' , "rb") as f:
-            states_info = tuple(json.load(f))
-
-        try:
-            with open('data/situation.json' , "rb") as f:
-                situation = tuple(json.load(f))
-        except Exception as e:
-            report_error(repr(e))
-            situation = [
-                {
-                    "Name": state["Name"],
-                    "alarm": False,
-                    "date": int(time.time())
-                }
-                for state in states_info
-            ]
-
-        good_list = list()
-        bad_list = list()
-
-        #making of update
-
-        for state_situation, state in zip(situation, states_info):
-            alarm_state = chek(state["stateId"])
-            if alarm_state == state_situation["alarm"]:
-                continue
-            state_situation["alarm"] = alarm_state
-            state_situation["date"] = int(time.time())
-            if alarm_state:
-                bad_list.append(state["Name"])
-            else:
-                good_list.append(state["Name"])
-
-        with open('data/situation.json', 'w') as f:
-            json.dump(situation, f)
-
-        del states_info, situation, state, state_situation, alarm_state
-
-        #notifications to users
-        if good_list or bad_list:
-            audience = Audience(r'data/audience.json')
-
-            notifications(good_list, False)
-            notifications(bad_list, True)
-
-            audience.save(r'data/audience.json')
-
-            del good_list, bad_list, audience
-
-            time.sleep(15)
-        else:
-            time.sleep(20)
-
+        with open('data/situation.json' , "rb") as f:
+            situation = tuple(json.load(f))
     except Exception as e:
         report_error(repr(e))
-        time.sleep(10)
+        situation = [
+            {
+                "Name": state["Name"],
+                "alarm": False,
+                "date": int(time.time())
+            }
+            for state in states_info
+        ]
+
+    #making of update
+    good_list = list()
+    bad_list = list()
+
+    for state_situation, state in zip(situation, states_info):
+        alarm_state = chek(state["stateId"])
+        if alarm_state == state_situation["alarm"]:
+            continue
+        state_situation["alarm"] = alarm_state
+        state_situation["date"] = int(time.time())
+        if alarm_state:
+            bad_list.append(state["Name"])
+        else:
+            good_list.append(state["Name"])
+
+    with open('data/situation.json', 'w') as f:
+        json.dump(situation, f)
+
+    del states_info, situation, state, state_situation, alarm_state
+
+    #notifications to users
+    if good_list or bad_list:
+        audience = Audience(r'data/audience.json')
+
+        notifications(good_list, False)
+        notifications(bad_list, True)
+
+        audience.save(r'data/audience.json')
+
+        del good_list, bad_list, audience
+
+        time.sleep(15)
+    else:
+        time.sleep(20)

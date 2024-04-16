@@ -10,10 +10,16 @@ from PIL       import Image
 from pytz      import timezone
 from telebot   import TeleBot, types, apihelper
 
+from migrations import migration_8_edit_audience
 import secret
 
 def updater():
-    import update_situation
+    while True:
+        try:
+            import update_situation
+        except Exception as e:
+            report_error(repr(e))
+            time.sleep(10)
 
 def timedelta(t):
     t = time.time()-t
@@ -247,7 +253,10 @@ class Audience(str):
 bot = TeleBot(secret.TOKEN)
 
 security_level = 1
-fi_vt = (str(),float()) #file_id, version_time
+data_map = {
+    "file_id" : str(),
+    "version_time" : float()
+}
 
 audience = Audience(r"data/audience.json")
 with open(r"data/ban_list.json", "rb") as f:
@@ -352,7 +361,7 @@ def testing(message):
 {'tost' if "t" in message.text else 'pong'}
 затримка: {round(time.time()-message.date,2)} сек
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.7.2
+версія: 4.7.3
         """
     )
     information(message)
@@ -436,9 +445,9 @@ def photo(message):
         text+= "Тривоги немає ✅\n"
     text+= "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
 
-    global fi_vt
-    if fi_vt[-1] == situation_mtime and message.from_user.id not in ban_list and security_level<3:
-        bot.send_photo(message.chat.id, fi_vt[0], text+"\n@YBAGA_bot", parse_mode='html')
+    global data_map
+    if data_map["version_time"] == situation_mtime and message.from_user.id not in ban_list and security_level<3:
+        bot.send_photo(message.chat.id, data_map["file_id"], text, parse_mode='html')
     else:
         pal = [
             150,0,0,
@@ -476,10 +485,10 @@ def photo(message):
         image.paste(maket)
 
         if security_level<3:
-            fi_vt = (
-                bot.send_photo(message.chat.id, image, text, parse_mode='html').photo[-2].file_id,
-                situation_mtime
-            )
+            data_map = {
+                "file_id" : bot.send_photo(message.chat.id, image, text, parse_mode='html').photo[-2].file_id,
+                "version_time" : situation_mtime
+            }
         else:
             bot.send_photo(message.chat.id, image, text, parse_mode='html')
     information(message)
