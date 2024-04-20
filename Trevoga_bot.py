@@ -10,7 +10,6 @@ from PIL       import Image
 from pytz      import timezone
 from telebot   import TeleBot, types, apihelper
 
-from migrations import migration_8_edit_audience
 import secret
 
 def updater():
@@ -361,7 +360,7 @@ def testing(message):
 {'tost' if "t" in message.text else 'pong'}
 затримка: {round(time.time()-message.date,2)} сек
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.7.3
+версія: 4.7.4
         """
     )
     information(message)

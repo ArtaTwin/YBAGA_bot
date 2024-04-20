@@ -63,8 +63,7 @@ def notifications(_states, alarm):
     else:
         start, end = f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b>', '</b> відбій тривоги ✅'
 
-    if int(time.time())%3 == 0: #random
-        end += "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
+    end += "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
 
     for state in _states:
         text = start+state+end
