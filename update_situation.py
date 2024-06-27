@@ -1,35 +1,17 @@
+import sys
 import json
 import time
-import traceback
 import urllib.request
 from datetime import datetime
+import threading
 
-from telebot  import TeleBot, apihelper
+from telebot  import TeleBot, types, apihelper
 from pytz     import timezone
 
 import secret
-
-def report_error(RE): #repr(exception)
-    FE = traceback.format_exc()
-    print(
-datetime.now().strftime('\t %x %X'),
-"Format exception:",
-FE,
-"Repr exception:",
-RE,
-sep="\n", end="\n"*3)
-
-    bot.send_message(secret.ADMIN_ID, f"""
-❗️ {datetime.now().strftime('%x %X')}
-*ERROR* :
-_Format exception_ :
-```{FE}```
-
-_Repr exception_ :
-```{RE}```
-""",
-parse_mode='Markdown') #MarkdownV2
-    time.sleep(1)
+from functions_reqwest.handlers.audience_module import Audience
+from functions_reqwest.handlers.reporter_error import *
+from functions_reqwest import _photo
 
 def chek(state_id):
     timeout = 10
@@ -40,7 +22,7 @@ def chek(state_id):
         except Exception as e:
 
             if timeout> 50: #total: 150
-                report_error(repr(e))
+                handlers.report_error(repr(e)) #!!!
 
             e = str(e)
             tuple_exception_example = (
@@ -51,9 +33,31 @@ def chek(state_id):
 
             for exception_example in tuple_exception_example:
                 if exception_example in e:
+                    print("chek sleep:", timeout)
                     time.sleep(timeout)
                     timeout += 10
                     break
+
+def distribution(subscribers, func, **kwargs):
+     for sub_id in subscribers:
+         try:
+             func(chat_id=sub_id, **kwargs)
+         except apihelper.ApiTelegramException as e:
+             e = str(e)
+             tuple_exception_example = (
+                 "Error code: 403",
+                 "Error code: 400. Description: Bad Request: chat not found",
+                 "Error code: 400. Description: Bad Request: group chat was upgraded to a supergroup chat"
+             )
+             for exception_example in tuple_exception_example:
+                 if exception_example in e:
+                     audience.cleen_SubId(sub_id)
+                     bot.send_message(secret.ADMIN_ID, f"id removed <pre>{sub_id}</pre>", parse_mode='html')
+                     break
+             else:
+                 bot.send_message(secret.ADMIN_ID, f"sub_id was <pre>{sub_id}</pre>", parse_mode='html')
+                 if 0 > sub_id:
+                     bot.leave_chat(sub_id)
 
 def notifications(_states, alarm):
     if alarm:
@@ -67,82 +71,40 @@ def notifications(_states, alarm):
 
     for state in _states:
         text = start+state+end
-        for sub_id in audience.getSubscribers(state):
-            try:
-                bot.send_message(sub_id, text, parse_mode='html')
-            except apihelper.ApiTelegramException as e:
-                e = str(e)
-                tuple_exception_example = (
-                    "Error code: 403",
-                    "Error code: 400. Description: Bad Request: chat not found",
-                    "Error code: 400. Description: Bad Request: group chat was upgraded to a supergroup chat"
-                )
-                for exception_example in tuple_exception_example:
-                    if exception_example in e:
-                        audience.cleenSubId(sub_id)
-                        bot.send_message(secret.ADMIN_ID, f"id removed <pre>{sub_id}</pre>", parse_mode='html')
-                        break
-                else:
-                    bot.send_message(secret.ADMIN_ID, f"sub_id was <pre>{sub_id}</pre>", parse_mode='html')
-                    report_error(repr(e))
-                    if 0 > sub_id:
-                        bot.leave_chat(sub_id)
+        distribution(
+            subscribers= audience.get_Subscribers(state),
+            func= bot.send_message,
+            text= text,
+            parse_mode= 'html'
+        )
 
-class Audience(str):
-    """
-    state: str
-    sub_id: int
-    subscribers: list[sub_id]
-    audience: dict[state:subscribers]
-    """
+def send_photo(chat_id):
+    from_user = types.User(id=chat_id, is_bot=None, first_name=None)
+    about_chat = types.Chat(id=chat_id, type=None)
 
-    changed = bool()
+    message = types.Message(message_id=None, from_user= from_user,
+        date=None, chat=about_chat, content_type=None,
+        options=(), json_string=None)
+    _photo.photo(message, 0)
 
-    def __init__(self, path):
-        try:
-            f_read = open(path, "rb")
-            self.__audience  = json.load(f_read)
-            f_read.close()
-        except Exception as e:
-            report_error(repr(e))
+def N(x, state_info): #!!! rename
+    alarm_state = chek(state_info["stateId"])
+    state_situation = situation[x]
+    if alarm_state == state_situation["alarm"]:
+        return
 
-            with open(r'static/states_info.json','rb') as f:
-                states_info = json.load(f)
-
-            self.__audience = {
-                state["Name"] : list()
-                for state in states_info
-            }
-
-            print("Audience generated without Subscribers")
-
-    def getSubscribers(self, state):
-        return tuple(self.__audience[state])
-
-    def delSubId(self, state, sub_id):
-        if sub_id in self.__audience[state]:
-            self.__audience[state].remove(sub_id)
-
-    def cleenSubId(self, sub_id):
-        self.changed = True
-        for state in self.__audience:
-            self.delSubId(state, sub_id)
-
-    def save(self, path):
-        if not self.changed:
-            return
-        try:
-            f_write = open(path, 'w')
-            json.dump(self.__audience, f_write)
-            f_write.close()
-        except Exception as e:
-            report_error(repr(e))
-        self.changed = False
+    state_situation["alarm"] = alarm_state
+    state_situation["date"] = int(time.time())
+    if alarm_state:
+        bad_list.append(state_info["Name"])
+    else:
+        good_list.append(state_info["Name"])
 
 time.sleep(5)
 
 bot = TeleBot(secret.TOKEN)
-print("update_situatiaon.py started")
+
+print(f"<{datetime.now().strftime('%x %X')}> update_situatiaon.py started")
 
 while True:
     #initialization
@@ -153,7 +115,7 @@ while True:
         with open('data/situation.json' , "rb") as f:
             situation = tuple(json.load(f))
     except Exception as e:
-        report_error(repr(e))
+        handlers.report_error(repr(e)) #!!!
         situation = [
             {
                 "Name": state["Name"],
@@ -167,21 +129,23 @@ while True:
     good_list = list()
     bad_list = list()
 
-    for state_situation, state in zip(situation, states_info):
-        alarm_state = chek(state["stateId"])
-        if alarm_state == state_situation["alarm"]:
-            continue
-        state_situation["alarm"] = alarm_state
-        state_situation["date"] = int(time.time())
-        if alarm_state:
-            bad_list.append(state["Name"])
-        else:
-            good_list.append(state["Name"])
+    t=time.time()
+    list_threads=[
+        threading.Thread(target=N, args=values)
+        for values in enumerate(states_info)
+    ]
 
+    for thread in list_threads: #start
+        thread.start()
+
+    for thread in list_threads: #wait
+        thread.join()
+
+    print(time.time()-t)
     with open('data/situation.json', 'w') as f:
         json.dump(situation, f)
 
-    del states_info, situation, state, state_situation, alarm_state
+    del states_info, situation, list_threads
 
     #notifications to users
     if good_list or bad_list:
@@ -190,7 +154,12 @@ while True:
         notifications(good_list, False)
         notifications(bad_list, True)
 
-        audience.save(r'data/audience.json')
+        audience.save()
+
+        distribution(
+            subscribers= audience.get_Subscribers('Україні (мапа)'),
+            func= send_photo,
+        )
 
         del good_list, bad_list, audience
 
