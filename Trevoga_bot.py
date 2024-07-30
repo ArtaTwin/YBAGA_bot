@@ -15,7 +15,6 @@ from handlers.BanList_meneger import BanList
 from handlers.stenography_handler import decoder
 from functions_reqwest import _info, _photo, form_controller
 
-threading.Thread(target=update_situation.main, daemon=True).start()
 
 def information(message):
     if security_level == 0:
@@ -47,7 +46,6 @@ class ExceptionHandler(ExceptionHandler):
 bot= TeleBot(secret.TOKEN, exception_handler=ExceptionHandler())
 ban_list= BanList(r"data/ban_list.json")
 security_level= 1
-freeze_updater= 0
 dict_function= {
     "info" : _info.info,
     "map" : _photo.photo,
@@ -55,7 +53,8 @@ dict_function= {
 }
 
 make_warning(20, f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
-
+threading.Thread(target=update_situation.main, daemon=True).start()
+freeze_updater= 0
 
 @bot.message_handler(commands=['restart', 'r'])
 def restart(message):

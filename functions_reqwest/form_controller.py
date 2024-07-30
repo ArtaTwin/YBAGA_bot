@@ -1,5 +1,5 @@
 import time
-from telebot   import TeleBot, util, apihelper
+from telebot   import TeleBot, util, apihelper, types
 
 import secret
 from handlers.Audience_meneger import Audience
@@ -44,7 +44,15 @@ def markup_generator(sub_id):
         {'callback_data': f"\'A\', {sub_id}"})
     )
 
-    return util.quick_markup(dict(buttons))
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    for i in range(len(buttons)//2):
+        markup.add(
+            types.InlineKeyboardButton(buttons[i*2][0], callback_data=buttons[i*2][1]['callback_data']),
+            types.InlineKeyboardButton(buttons[i*2+1][0], callback_data=buttons[i*2+1][1]['callback_data'])
+        )
+
+    return markup
+    #return util.quick_markup(dict(buttons))
 
 def uncustomizer_chek(chat_id, user_id):
     if chat_id == user_id: #chat.type  == "private"
