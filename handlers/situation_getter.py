@@ -2,11 +2,11 @@ import json
 import random
 import time
 
-from .ban_list_module import Ban_list
+from handlers.BanList_meneger import BanTuple
 
-#ban_list = Ban_list(r"data/ban_list.json")
 def get_situation(sub_id):
-    if sub_id in Ban_list(r"data/ban_list.json"):
+    bt = BanTuple(r"data/ban_list.json")
+    if sub_id in bt:
         with open(r'static/states_info.json' , "rb") as f:
             states_info = json.load(f)
 

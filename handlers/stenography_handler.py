@@ -41,17 +41,16 @@ def pictorial(num: int):
 
     maket = Image.new(
         "P", #mode
-        (5 * count_cells, 2)
+        (5 * count_cells, 2) #size
     )
     maket.putpalette(pal)
     pixlist = maket.load()
 
     for cell_number in range(count_cells):
-        pixlist[cell_number*5: 5+cell_number*5, 0:1] = cell_number+36
-
-#        for a in range(5):
-#            pixlist[cell_number*5+a, 0] = cell_number+36 #id in palette
-#            pixlist[cell_number*5+a, 1] = cell_number+36
+#        pixlist[cell_number*5: 5+cell_number*5, 0:1] = cell_number+36
+        for a in range(5):
+            pixlist[cell_number*5+a, 0] = cell_number+36 #id in palette
+            pixlist[cell_number*5+a, 1] = cell_number+36
     return maket, pal
 
 def decoder(text: str):
@@ -64,5 +63,5 @@ def decoder(text: str):
                 bits += "1"
             else:
                 bits += "0"
-
-    return bits, int(bits[::-1],2)
+    bits= bits[::-1]
+    return bits, int(bits, 2)

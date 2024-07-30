@@ -6,14 +6,14 @@ from pytz      import timezone
 from telebot   import TeleBot
 
 import secret
-from .handlers.situation_getter   import get_situation
-from .handlers.map_maker          import painter
-from .handlers.stenography_module import pictorial
-from .handlers.ban_list_module    import Ban_list
+from handlers.situation_getter   import get_situation
+from handlers.map_maker          import painter
+from handlers.stenography_handler import pictorial
+from handlers.BanList_meneger    import BanTuple
 
 
 bot = TeleBot(secret.TOKEN)
-ban_list = Ban_list(r"data/ban_list.json")
+ban_tuple = BanTuple(r"data/ban_list.json")
 data_map = {
     "file_id" : str(),
     "version_time" : float()
@@ -28,22 +28,24 @@ def photo(message, security_level):
 
 
     difference = int()
-    str_list_of_alarm = str()
+    text = str()
     for k, state in enumerate(situation, start=1):
         if not state["alarm"]:
             difference += 1
             continue
-        str_list_of_alarm += f"{k-difference}. {state['Name']}\n"
+        text += f"{k-difference}. {state['Name']}\n"
 
     if difference:
-        text += "Тривога у:\n"+ str_list_of_alarm
+        text= "Тривога у:\n"+text
     else:
-        text += "Тривоги немає ✅\n"
+        text = "Тривоги немає ✅\n"
+
+    text = f"Станом на {datetime.fromtimestamp(situation_mtime, tz=timezone('Europe/Kiev')).strftime('%d.%m %H:%M')} за Києвом\n\n"+ text
 
     if 0 < message.chat.id:
         text+= "\n\n<b><a href='https://t.me/YBAGA_bot'>YBAGA_bot</a></b>"
 
-    if data_map["version_time"] == situation_mtime and message.from_user.id not in ban_list and security_level<3:
+    if data_map["version_time"] == situation_mtime and message.from_user.id not in ban_tuple and security_level<3:
         bot.send_photo(message.chat.id, data_map["file_id"], text, parse_mode='html')
         return
 

@@ -1,80 +1,81 @@
 import json
-import random
+import threading
 import time
 from datetime  import datetime
 from pathlib   import Path
-import threading
 
 from pytz      import timezone
-from telebot   import TeleBot, types, apihelper, util, ExceptionHandler
+from telebot   import TeleBot, apihelper, util, ExceptionHandler
 
 import secret
-from functions_reqwest.handlers.reporter_error import *
-from functions_reqwest import _info
-from functions_reqwest import _photo
-from functions_reqwest import form_controller
+import update_situation
+from handlers.error_handler import *
+from handlers.Audience_meneger import Audience
+from handlers.BanList_meneger import BanList
+from handlers.stenography_handler import decoder
+from functions_reqwest import _info, _photo, form_controller
 
-from migrations import migration_9_add_map_in_audience
-
-def updater():
-    while True:
-        import update_situation
+threading.Thread(target=update_situation.main, daemon=True).start()
 
 def information(message):
-    if security_level > 0:
-        text_tg = f"""
+    if security_level == 0:
+        return
+
+    text_tg = f"""
 🔵 {datetime.fromtimestamp(message.date).strftime('%d/%m/%Y %H:%M:%S')}
 
-Ім я: <pre>{message.from_user.first_name}</pre>
-Псевдонім: <pre>{message.from_user.username}</pre>
-Last_name:<pre>{message.from_user.last_name}</pre>
-User_id= <pre>{message.from_user.id}</pre>
-message_id= {message.message_id}
-Вид чату: {message.chat.type}
-Chat_id = <pre>{message.chat.id}</pre>
-command: {message.text}
+Name: <pre>{message.from_user.first_name}</pre>
+Username: <pre>{message.from_user.username}</pre>
+LastName:<pre>{message.from_user.last_name}</pre>
+UserId: <pre>{message.from_user.id}</pre>
+MessageId: {message.message_id}
+ChatType: {message.chat.type}
+Chat_id: <pre>{message.chat.id}</pre>
+Command: {message.text}
 """
-        bot.send_message(secret.ADMIN_ID, text_tg, parse_mode='html')
+    bot.send_message(secret.ADMIN_ID, text_tg, parse_mode='html')
 
 class ExceptionHandler(ExceptionHandler):
     def handle(self, exc_value):
-        report_error(exc_value.__class__, exc_value, exc_value.__traceback__)
-        #raise exception
-        return True
+        if exc_value.__class__ == ZeroDivisionError:
+            return False
+        else:
+            my_excepthook(exc_value.__class__, exc_value, exc_value.__traceback__)
+            return True
 
 
-
-bot = TeleBot(secret.TOKEN, exception_handler=ExceptionHandler())
-
-security_level = 1
-
-dict_function = {
+bot= TeleBot(secret.TOKEN, exception_handler=ExceptionHandler())
+ban_list= BanList(r"data/ban_list.json")
+security_level= 1
+freeze_updater= 0
+dict_function= {
     "info" : _info.info,
     "map" : _photo.photo,
     "form" : form_controller.form
 }
 
-threading.Thread(target=updater, args=(), daemon=False, name="update_situation").start()
+start_date= f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started"
+bot.send_message(secret.ADMIN_ID, start_date)
+print(start_date)
 
-bot.send_message(secret.ADMIN_ID, datetime.now().strftime('%x %X \n')+"Trevoga_bot.py started")
-print(f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
 
 @bot.message_handler(commands=['restart', 'r'])
 def restart(message):
-    if message.from_user.id==secret.ADMIN_ID or message.chat.id==552733968:
+    if message.from_user.id==secret.ADMIN_ID:
         bot.send_message(
             message.chat.id,
             f"{datetime.fromtimestamp(message.date).strftime('%x %X')}\n Bot start to restart"
         )
+
         #This forces telebot to crash exit. It will be restarted by service script. We tried exit(1), KeyboardInterrup, but they don't work as good as 1/0
-        1/0 #!!!
+        1/0
 
 @bot.message_handler(commands=['su']) #security_level up
 def su(message):
     if message.from_user.id==secret.ADMIN_ID:
         global security_level
         security_level+=1
-        bot.send_message(message.chat.id, f"safer\nsecurity_level: <pre>{security_level}</pre>", parse_mode='html')
+        bot.send_message(message.chat.id, f"security_level: <b>{security_level}</b>", parse_mode='html')
 
 @bot.message_handler(commands=['sd']) #security_level down
 def sd(message):
@@ -82,12 +83,12 @@ def sd(message):
         global security_level
         if security_level:
             security_level-=1
-        bot.send_message(message.chat.id, f"less safe\nsecurity_level: <pre>{security_level}</pre>", parse_mode='html')
+        bot.send_message(message.chat.id, f"security_level: <b>{security_level}</b>", parse_mode='html')
 
 @bot.message_handler(commands=['as']) #all SubId
 def all_sub(message):
     if message.from_user.id==secret.ADMIN_ID:
-        audience.reload()
+        audience = Audience(r"data/audience.json")
         all_SubId = audience.all_SubId()
         bot.send_message(secret.ADMIN_ID, f"<pre>len: {len(all_SubId)}</pre>\n\n{all_SubId}", parse_mode='html')
         with open(r'data/audience.json','rb') as f:
@@ -102,7 +103,7 @@ def ban_user(message):
         except ValueError:
             bot.send_message(message.chat.id, "id is not correct\n"+id)
 
-        ban_list.add_ui(id)
+        ban_list.append(id)
 
         ban_list.save()
         bot.send_message(message.chat.id, f"user banned\n<pre>{id}</pre>", parse_mode='html')
@@ -111,15 +112,13 @@ def ban_user(message):
 def unban_user(message):
     if message.from_user.id==secret.ADMIN_ID:
         id = util.extract_arguments(message.text)
-        try:
-            id = int(id)
-        except ValueError:
+        if id.isalpha():
             bot.send_message(message.chat.id, "id is not correct\n"+id)
             return
 
-        try:
-            ban_list.del_ui(id)
-        except ValueError:
+        if id in ban_list:
+            ban_list.remove(id)
+        else:
             bot.send_message(message.chat.id, "id not found\n"+str(id))
             return
 
@@ -131,27 +130,32 @@ def sbl(message):
     if message.from_user.id==secret.ADMIN_ID:
         bot.send_message(message.chat.id, f"<pre>len: {len(ban_list)}</pre>\n\n{ban_list}", parse_mode='html')
 
-        with open(ban_list.path,'rb') as f:
+        with open(ban_list.path, 'rb') as f:
+            bot.send_document(message.chat.id, f)
+
+@bot.message_handler(commands=['glog']) #get Log.log
+def glog(message):
+    if message.from_user.id==secret.ADMIN_ID:
+        with open("Log.log", 'rb') as f:
             bot.send_document(message.chat.id, f)
 
 @bot.message_handler(commands=['decoder', 'dc'])
 def dc(message):
     if message.from_user.id==secret.ADMIN_ID:
-        bin, id = Stenography.decoder(
+        bin, id = decoder(
             util.extract_arguments(message.text)
         )
         bot.send_message(message.chat.id, f"bin: <pre>{bin}</pre>\nid: <pre>{id}</pre>", parse_mode='html')
 
-@bot.message_handler(commands=['test','t','ping','p']) #testing
-def testing(message):
-    bot.send_message(message.chat.id,
-        f"""
+@bot.message_handler(commands=['test','t','ping','p'])
+def ping(message):
+    text=f"""
 {'tost' if "t" in message.text else 'pong'}
 затримка: {round(time.time()-message.date,2)} сек
+freeze_updater: {freeze_updater} times
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.8.0 alfa
-        """
-    )
+версія: 4.8.0"""
+    bot.send_message(message.chat.id, text)
     information(message)
 
 @bot.message_handler(commands=['stiker', 's'])
@@ -168,8 +172,8 @@ def start(message):
 /form - Налаштування надсилання повідомлень про початок або відбій тривоги
 <b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>
 
-<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a>
-<a href='https://t.me/+GCh0rwIVS-tkNmIy'>Пропозиції та звіти помилок</a></b>"""
+<b><a href='https://t.me/+FeZvEeXW5lIzMjYy'>Support Тривога Бот</a></b>
+"""
 
     bot.send_message(message.chat.id, help_text,
         parse_mode='html', disable_web_page_preview= True)
@@ -177,6 +181,11 @@ def start(message):
 
 @bot.message_handler(commands=list(dict_function))
 def multipurpose(message):
+    if Path(r'data/situation.json').lstat().st_mtime+120 < time.time():
+        freeze_updater+=1
+        threading.Thread(target=update_situation.main, daemon=True).start()
+        make_warning(30, f"Updater freezed {freeze_updater}. Started one more thread.")
+        time.sleep(10)
     command= util.extract_command(message.text)
     dict_function[command](message, security_level)
     information(message)

@@ -1,8 +1,9 @@
-from telebot   import TeleBot, types, apihelper
+import time
+from telebot   import TeleBot, util, apihelper
 
 import secret
-from .handlers.audience_module import Audience
-from .handlers.reporter_error import report_error
+from handlers.Audience_meneger import Audience
+from handlers.error_handler import make_warning
 
 __all__ = ['form', 'callback_inline']
 
@@ -11,22 +12,39 @@ bot = TeleBot(secret.TOKEN)
 audience = Audience(r"data/audience.json")
 
 def markup_generator(sub_id):
-    markup = types.InlineKeyboardMarkup()
-    audience.reload()
-    for i, SubscriptionsOfSubId in enumerate(audience.get_SubscriptionsOfSubId(sub_id)):
-        state, subscription_is_available = SubscriptionsOfSubId
-        markup.add(
-            types.InlineKeyboardButton(
-                state+(" ✅" if subscription_is_available else ""),
-                callback_data=str(
-                    (i, subscription_is_available, sub_id)
-                )
-            )
-        )
-    #phoro_subscription = sub_id in audience["send map"]
-    #markup.add(types.InlineKeyboardButton("🗺 Надсилати мапу "+ ('✅' if phoro_subscription else ''), callback_data=str(("M", phoro_subscription, sub_id)) ))
-    markup.add(types.InlineKeyboardButton("Зберегти налаштування ⚙️", callback_data=str(("C", 0, sub_id)) )) #save and close
-    return markup
+    SubscriptionsOfSubId= audience.get_subscriptions(sub_id)
+    keys_audience= tuple(audience)
+
+    if len(audience) > len(SubscriptionsOfSubId)*2:
+        buttons= [
+            [state, {'callback_data': f"{i}, {sub_id}"}]
+            for i, state in enumerate(audience)
+        ]
+
+        for state in SubscriptionsOfSubId:
+            index= keys_audience.index(state)
+            buttons[index][0]+= " ✅"
+
+    else:
+        buttons= [
+                [state+ " ✅", {'callback_data': f"{i}, {sub_id}"}]
+                for i, state in enumerate(audience)
+            ]
+
+        for state in audience:
+            if state in SubscriptionsOfSubId:
+                continue
+            index= keys_audience.index(state)
+            buttons[index][0]= state
+
+    buttons.append( ("Зберегти ⚙️", {'callback_data': f"\'S\', {sub_id}"}) )
+
+    buttons.append(
+        ("Всі "+("❌" if SubscriptionsOfSubId else "✅"),
+        {'callback_data': f"\'A\', {sub_id}"})
+    )
+
+    return util.quick_markup(dict(buttons))
 
 def uncustomizer_chek(chat_id, user_id):
     if chat_id == user_id: #chat.type  == "private"
@@ -79,6 +97,7 @@ def form(message, security_level=None):
             )
             return
 
+        audience.reload()
         bot.reply_to(
             message.reply_to_message,
             f'Надсилати повідомлення до каналу \'<b>{info_about_replying_chat.title}</b>\', коли тривога буде в:',
@@ -86,58 +105,72 @@ def form(message, security_level=None):
             reply_markup=markup_generator(info_about_replying_chat.id)
         )
     else:
+        audience.reload()
         bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде в:', reply_markup=markup_generator(message.chat.id))
 
 def callback_form(call):
-    try:
-        if uncustomizer_chek(call.message.chat.id, call.from_user.id):
-            bot.answer_callback_query(callback_query_id=call.id, show_alert=True, text="Взаємодіяти з цією формою може тільки автор групи або адмінітратор")
-            time.sleep(1)
-            return
+    if uncustomizer_chek(call.message.chat.id, call.from_user.id):
+        time.sleep(1)
+        bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
+            text="Взаємодіяти з цією формою може тільки автор групи або адмінітратор"
+        )
+        return
 
-        global audience
-        code, subscription_is_available, sub_id = eval(call.data)
+    code, sub_id = eval(call.data)
 
-        if isinstance(code, int):
-            cmrk = call.message.reply_markup.keyboard[code][0] #OPTIMIZE: link. But I cannot create a link by cmrk.text
-            if subscription_is_available:
-                cmrk.text = cmrk.text[:-2] # state - ???
-                audience.del_SubId(cmrk.text, sub_id)
-            else:
-                audience.add_SubId(cmrk.text, sub_id)
-                cmrk.text += " ✅"
+    if isinstance(code, int):
+        state= tuple(audience)[code]
+        subscribers= audience[state]
 
-            cmrk.callback_data= str(
-                (code, not subscription_is_available, sub_id)
-            )
-
-            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:", reply_markup=call.message.reply_markup)
-            return
-
-        elif code=="C": #close
-            audience.save()
-            subscriptions_of_user = audience.find_SubId(sub_id)
-
-            if subscriptions_of_user:
-                str_subscriptions_of_user = "\n".join(
-                    [
-                        f" {k}. {state}"
-                        for k, state in enumerate(subscriptions_of_user,start=1)
-                    ]
-                )
-                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                text="Повідомлення будуть надходити, коли змінюватиметься ситуація в:\n"+str_subscriptions_of_user,
-                reply_markup=None)
-            else:
-                bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
-                text="Повідомлення не будуть надходити",
-                reply_markup=None)
-            return
+        if call.message.reply_markup.keyboard[code//2][code%2].text[-1] == "✅":
+            if sub_id in subscribers:
+                subscribers.remove(sub_id)
+            bot.answer_callback_query(callback_query_id=call.id, text=state+" ❌")
 
         else:
-            raise ValueError(f"Unidentified value: {code=}")
+            if sub_id not in subscribers:
+                subscribers.append(sub_id)
+            bot.answer_callback_query(callback_query_id=call.id, text=state+" ✅")
 
-    except Exception as e:
-        report_error(repr(e))
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.send_message(call.message.chat.id, 'Відбувся збій.\nПовторіть спробу, будь ласка')
+        try:
+            bot.edit_message_text(chat_id=call.message.chat.id,
+                message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:",
+                reply_markup=markup_generator(sub_id)
+            )
+        except apihelper.ApiTelegramException:
+            time.sleep(0.5)
+
+
+    elif code=="S": #Save
+        audience.save()
+        subscriptions_of_user = audience.get_subscriptions(sub_id)
+
+        if subscriptions_of_user:
+            str_subscriptions_of_user = "\n".join(
+                [
+                    f" {k}. {state}"
+                    for k, state in enumerate(subscriptions_of_user,start=1)
+                ]
+            )
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+            text="Повідомлення будуть надходити, коли змінюватиметься ситуація в:\n"+str_subscriptions_of_user,
+            reply_markup=None)
+        else:
+            bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+            text="Повідомлення не будуть надходити",
+            reply_markup=None)
+
+    elif code=="A":
+        time.sleep(1)
+        if audience.get_subscriptions(sub_id):
+            audience.del_SubId(sub_id)
+        else:
+            for state in audience:
+                audience[state].append(sub_id)
+
+        audience.save()
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:", reply_markup=markup_generator(sub_id))
+
+
+    else:
+        raise ValueError(f"Unidentified value: {code}")

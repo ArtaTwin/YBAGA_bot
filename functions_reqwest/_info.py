@@ -6,8 +6,8 @@ from pytz      import timezone
 from telebot   import TeleBot
 
 import secret
-from .handlers.situation_getter import get_situation
-from .handlers.stenography_module import writing
+from handlers.situation_getter import get_situation
+from handlers.stenography_handler import writing
 
 
 bot = TeleBot(secret.TOKEN)
