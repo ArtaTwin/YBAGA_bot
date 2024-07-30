@@ -54,9 +54,7 @@ dict_function= {
     "form" : form_controller.form
 }
 
-start_date= f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started"
-bot.send_message(secret.ADMIN_ID, start_date)
-print(start_date)
+make_warning(20, f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
 
 
 @bot.message_handler(commands=['restart', 'r'])
@@ -139,6 +137,12 @@ def glog(message):
         with open("Log.log", 'rb') as f:
             bot.send_document(message.chat.id, f)
 
+@bot.message_handler(commands=['clog']) #cleen Log.log
+def clog(message):
+    if message.from_user.id==secret.ADMIN_ID:
+        open("Log.log", 'w').close()
+        bot.send_message(message.chat.id, "\'Log.log\' cleaned")
+
 @bot.message_handler(commands=['decoder', 'dc'])
 def dc(message):
     if message.from_user.id==secret.ADMIN_ID:
@@ -154,7 +158,7 @@ def ping(message):
 затримка: {round(time.time()-message.date,2)} сек
 freeze_updater: {freeze_updater} times
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.8.0"""
+версія: 4.8.0+"""
     bot.send_message(message.chat.id, text)
     information(message)
 
@@ -182,6 +186,7 @@ def start(message):
 @bot.message_handler(commands=list(dict_function))
 def multipurpose(message):
     if Path(r'data/situation.json').lstat().st_mtime+120 < time.time():
+        global freeze_updater
         freeze_updater+=1
         threading.Thread(target=update_situation.main, daemon=True).start()
         make_warning(30, f"Updater freezed {freeze_updater}. Started one more thread.")

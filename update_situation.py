@@ -5,7 +5,7 @@ import urllib.request
 from datetime import datetime
 
 from pytz     import timezone
-from telebot  import TeleBot, types, apihelper, util
+from telebot  import TeleBot, types, apihelper#, util
 
 import secret
 from handlers.Audience_meneger import Audience
@@ -25,7 +25,7 @@ def check(state_id):
         except Exception as e:
 
             if timeout> 50: #total: 150
-                make_warning(40, f"Problem with request. Timeout: {timeout}s. {repr(e)}")
+                make_warning(40, f"Problem with request. Timeout: {timeout}s.", exc_info=True)
 
             e = str(e)
             tuple_exception_example = (
@@ -40,7 +40,7 @@ def check(state_id):
                     timeout += 10
                     break
             else:
-                make_warning(40, f"I cannot make a request. {repr(e)}")
+                make_warning(40, f"I cannot make a request. {repr(e)}", exc_info=True)
 
 def notifications(good_list, bad_list):
     audience = Audience(r'data/audience.json')
@@ -55,7 +55,8 @@ def notifications(good_list, bad_list):
             if sub_id in ban_tuple:
                 continue
             try:
-                util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html')
+                #util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html')
+                bot.send_message(sub_id, send_text, parse_mode= 'html')
                 if sub_id in photo_sub:
                     send_photo(sub_id)
                     photo_sub.remove(sub_id)

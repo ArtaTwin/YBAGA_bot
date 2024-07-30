@@ -40,7 +40,7 @@ def repr_traceback(traceback):
         traceback = traceback.tb_next
     return text
 
-def make_warning(level: int, msg: str, *args, **kwargs):
+def make_warning(level: int, msg: str, *args, exc_info=False, **kwargs):
     date= datetime.now().strftime('%x %X')
     level_str= str()
 
@@ -49,7 +49,7 @@ def make_warning(level: int, msg: str, *args, **kwargs):
     else:
         level_str= ("NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")[level//10]
 
-    logging.log(level, msg, *args, exc_info=True, **kwargs)
+    logging.log(level, msg, *args, exc_info=exc_info, **kwargs)
     SendTextByTelegram(f"⚠ {level_str} | {date}\n message: {msg}")
 
 
