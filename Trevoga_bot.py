@@ -55,6 +55,7 @@ dict_function= {
 make_warning(20, f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
 threading.Thread(target=update_situation.main, daemon=True).start()
 freeze_updater= 0
+time.sleep(10)
 
 @bot.message_handler(commands=['restart', 'r'])
 def restart(message):
@@ -157,7 +158,7 @@ def ping(message):
 затримка: {round(time.time()-message.date,2)} сек
 freeze_updater: {freeze_updater} times
 ваш статус: {bot.get_chat_member(chat_id=message.chat.id, user_id=message.from_user.id).status}
-версія: 4.8.0+"""
+версія: 4.8.1"""
     bot.send_message(message.chat.id, text)
     information(message)
 

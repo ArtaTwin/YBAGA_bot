@@ -5,7 +5,7 @@ import urllib.request
 from datetime import datetime
 
 from pytz     import timezone
-from telebot  import TeleBot, types, apihelper#, util
+from telebot  import TeleBot, types, apihelper, util
 
 import secret
 from handlers.Audience_meneger import Audience
@@ -55,8 +55,7 @@ def notifications(good_list, bad_list):
             if sub_id in ban_tuple:
                 continue
             try:
-                #util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html')
-                bot.send_message(sub_id, send_text, parse_mode= 'html')
+                util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html')
                 if sub_id in photo_sub:
                     send_photo(sub_id)
                     photo_sub.remove(sub_id)
