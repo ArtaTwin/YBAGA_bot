@@ -55,7 +55,7 @@ def notifications(good_list, bad_list):
             if sub_id in ban_tuple:
                 continue
             try:
-                util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html')
+                util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html', disable_web_page_preview= True)
                 if sub_id in photo_sub:
                     send_photo(sub_id)
                     photo_sub.remove(sub_id)
