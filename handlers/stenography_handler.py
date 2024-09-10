@@ -8,7 +8,7 @@ targets = "арсеоіху" #ukr
 def to_bits(num: int):
     return [symbol=="1" for symbol in f"{abs(num):b}"]
 
-def writing( text: str, num: int):
+def writing(text: str, num: int):
     bits = to_bits(num)
     translator = dict(
         zip(targets,changes)
@@ -25,33 +25,40 @@ def writing( text: str, num: int):
     return "".join(text)
 
 def pictorial(num: int):
+    if num == 0:
+        pal= []
+        maket = Image.new(
+                "P",
+                (0, 0)
+            )
+        return maket, pal
+
+
     pal=list(map(
-        lambda x: 20+ x*235,
+        lambda x: 255 if x else 20,
         to_bits(num)
     ))
 
     count_cells, rest = divmod(
         (num).bit_length(), 3       #(num).bit_length() = len(pal)
     )
+    width_cells= 5
+    height_cells= 2
 
     if rest != 0:
          count_cells += 1
-         for i in range(3-rest):
-             pal.append(20)
+         pal += [128]*(3-rest)
 
     maket = Image.new(
-        "P", #mode
-        (5 * count_cells, 2) #size
+        "P",
+        (count_cells, 1)
     )
     maket.putpalette(pal)
-    pixlist = maket.load()
 
-    for cell_number in range(count_cells):
-#        pixlist[cell_number*5: 5+cell_number*5, 0:1] = cell_number+36
-        for a in range(5):
-            pixlist[cell_number*5+a, 0] = cell_number+36 #id in palette
-            pixlist[cell_number*5+a, 1] = cell_number+36
-    return maket, pal
+    for x in range(count_cells):
+        maket.putpixel((x,0), x+36)
+
+    return maket.resize( (count_cells*width_cells, height_cells) ), pal
 
 def decoder(text: str):
     bits = str()

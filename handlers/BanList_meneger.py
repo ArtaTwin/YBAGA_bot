@@ -20,10 +20,6 @@ class BanList(list):
         self.path = path
 
     def save(self):
-        self= tuple(
-            set(self)
-        )
-
         with open(self.path, 'w') as f_write:
             json.dump(self, f_write)
 

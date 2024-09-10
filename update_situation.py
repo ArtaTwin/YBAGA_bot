@@ -1,9 +1,9 @@
 import json
 import threading
 import time
-import urllib.request
 from datetime import datetime
 
+import requests
 from pytz     import timezone
 from telebot  import TeleBot, types, apihelper, util
 
@@ -15,47 +15,47 @@ from functions_reqwest import _photo
 
 
 def check(state_id):
-    timeout = 10
+    my_timeout = 10
     while True:
         try:
-            request_urlopen= urllib.request.urlopen(
-                f'https://air-save.ops.ajax.systems/api/mobile/status?regionId={state_id}'
+            r= requests.get(
+                'https://air-save.ops.ajax.systems/api/mobile/status',
+                params={'regionId':state_id},
+                headers={'Connection': 'close'},
+                timeout=my_timeout
             )
-            return request_urlopen.read() != b'{"alarms":[]}'
+        except requests.exceptions.Timeout:
+            my_timeout += 10
         except Exception as e:
-
-            if timeout> 50: #total: 150
-                make_warning(40, f"Problem with request. Timeout: {timeout}s.", exc_info=True)
-
-            e = str(e)
-            tuple_exception_example = (
-                '<urlopen error [Errno 16] Device or resource busy>',
-                'HTTP Error 504: Gateway Time-out',
-                'HTTP Error 403: Forbidden'
-            )
-
-            for exception_example in tuple_exception_example:
-                if exception_example in e:
-                    time.sleep(timeout)
-                    timeout += 10
-                    break
-            else:
-                make_warning(40, f"I cannot make a request. {repr(e)}", exc_info=True)
+            make_warning(40, f"Error with data updating. {repr(e)}", exc_info=True)
+        else:
+            if r.ok:
+                return bool(
+                    r.json()["alarms"]
+                )
+            elif my_timeout < 60:
+                make_warning(30, f"Problem with data updating. Code: {r.status_code}. Text: {r.text}")
+                my_timeout += 10
+            else: #total: 210 sec waiting
+                make_warning(40, f"Problem with data updating. Code: {r.status_code}. Text: {r.text}")
+                return None
 
 def notifications(good_list, bad_list):
     audience = Audience(r'data/audience.json')
-    ban_tuple = BanTuple(r'data/ban_list.json')
     photo_sub = audience['Україні (мапа)'].copy()
+    ban_tuple = BanTuple(r'data/ban_list.json')
+    date = datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")
     bot = TeleBot(secret.TOKEN)
-    start= str()
-    end= str()
+    text = str()
 
     def distribution(subscribers, send_text):
         for sub_id in subscribers:
             if sub_id in ban_tuple:
                 continue
             try:
-                util.antiflood(bot.send_message, chat_id=sub_id, text= send_text, parse_mode= 'html', disable_web_page_preview= True)
+                util.antiflood(bot.send_message, chat_id= sub_id, text= send_text,
+                    parse_mode= 'html', disable_web_page_preview= True
+                )
                 if sub_id in photo_sub:
                     send_photo(sub_id)
                     photo_sub.remove(sub_id)
@@ -75,23 +75,24 @@ def notifications(good_list, bad_list):
                     bot.send_message(secret.ADMIN_ID, f"sub_id was <pre>{sub_id}</pre>", parse_mode='html')
                     if 0 > sub_id:
                         bot.leave_chat(sub_id)
+            except Exception as e:
+                make_warning(40, f"Error with notifications. {repr(e)}", exc_info=True)
 
-    start= f'✅ {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\nУ <b><a href="https://t.me/YBAGA_bot">'
-    end= '</a></b> відбій тривоги ✅'
+    text= '✅ '+ date+ '\nУ <b><a href="https://t.me/YBAGA_bot">{state}</a></b> відбій тривоги ✅'
 
     for state in good_list:
-        text = start+state+end
-        distribution(subscribers= audience[state], send_text= text)
+        distribution(subscribers= audience[state],
+            send_text= text.format(state=state)
+        )
 
-
-    start= f'🚨 {datetime.now(tz=timezone("Europe/Kiev")).strftime("%H:%M %d.%m")}\n🚨<b>У <a href="https://t.me/YBAGA_bot">'
-    end= '</a> розпочалася тривога </b> 🚨'
-    if len(bad_list) > 12:
-        end += "\nМожливі пуски ракет з МіГ-31К"
+    text= '🚨 '+ date+ '\n<b>У <a href="https://t.me/YBAGA_bot">{state}</a> розпочалася тривога </b> 🚨'
+    if len(bad_list) > 10:
+        text += "\nМожливі пуски ракет з МіГ-31К"
 
     for state in bad_list:
-        text = start+state+end
-        distribution(subscribers= audience[state], send_text= text)
+        distribution(subscribers= audience[state],
+            send_text= text.format(state=state)
+        )
 
     audience.save()
 
@@ -102,7 +103,7 @@ def send_photo(chat_id):
     message = types.Message(message_id=None, from_user= from_user,
         date=None, chat=about_chat, content_type=None,
         options=(), json_string=None)
-    _photo.photo(message, 0)
+    _photo.photo(message)
 
 def main():
     print(f"<{datetime.now().strftime('%x %X')}> update_situatiaon.py started. Waiting 5 sec for main.")
@@ -111,6 +112,9 @@ def main():
 
     def N(x, state_info): #!!! rename
         alarm_state = check(state_info["stateId"])
+        if alarm_state == None:
+            return
+
         state_situation = situation[x]
         if alarm_state == state_situation["alarm"]:
             return
@@ -140,12 +144,11 @@ def main():
             for state in states_info
         ]
 
+    good_list = list()
+    bad_list = list()
 
     while True:
-
-        good_list = list()
-        bad_list = list()
-        list_threads=[
+        list_threads= [
             threading.Thread(target=N, args=values)
             for values in enumerate(states_info)
         ]
@@ -161,6 +164,9 @@ def main():
 
         if good_list or bad_list:
             notifications(good_list, bad_list)
+
+            good_list.clear()
+            bad_list.clear()
 
         time.sleep(20)
 

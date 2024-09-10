@@ -22,7 +22,7 @@ def color(t, alarm):
         else:
             return (0,120,0)
 
-def painter(situation, add_maket, add_pal):
+def painter(situation, maket, pal_maket):
     pal = [
         150,0,0,
         100,0,0,
@@ -37,15 +37,15 @@ def painter(situation, add_maket, add_pal):
         255,255,255
     ]
 
-    image = Image.open(r"static/map.png")
-    image.putpalette(
-        [
-            primary_color
-            for state in situation
-            for primary_color in color(state["date"], state["alarm"])
-        ]+ pal+ add_pal
-    )
+    with Image.open(r"static/map.png") as image:
+        image.putpalette(
+            [
+                primary_color
+                for state in situation
+                for primary_color in color(state["date"], state["alarm"])
+            ]+ pal+ pal_maket
+        )
 
-    image.paste(add_maket)
+        image.paste(maket)
 
-    return image
+        return image

@@ -1,11 +1,10 @@
 import time
+
 from telebot   import TeleBot, util, apihelper
 
 import secret
 from handlers.Audience_meneger import Audience
 from handlers.error_handler import make_warning
-
-__all__ = ['form', 'callback_inline']
 
 
 bot = TeleBot(secret.TOKEN)
@@ -60,53 +59,38 @@ def uncustomizer_chek(chat_id, user_id):
         )
 
 
-def form(message, security_level=None):
+def form(message, security_level=3):
     if uncustomizer_chek(message.chat.id, message.from_user.id):
-        bot.send_message(message.chat.id,
-            'Налаштувати надсилання повідомлень про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмініcтратор</b>. І бот повинен мати права адмінстратора',
-            parse_mode='html'
-        )
-        return
+        text= 'Налаштувати надсилання повідомлень про початок або відбій тривоги може тільки <b>автор групи</b> або <b>адмініcтратор</b>. І бот повинен мати права адмінстратора'
+        return bot.send_message(message.chat.id, text, parse_mode='html')
 
     if message.reply_to_message:
         info_about_replying_chat = message.reply_to_message.forward_from_chat
 
-        if info_about_replying_chat == None or info_about_replying_chat.type != 'channel':
-            bot.send_message(
-                message.chat.id,
-                "Налаштовувати сповіщення таким чином можна тільки для каналів\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
-                parse_mode='html'
-            )
-            return
+        if info_about_replying_chat == None or info_about_replying_chat.type != 'channel': #1
+            text= "Налаштовувати сповіщення таким чином можна тільки для каналів\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>"
+            return bot.send_message(message.chat.id, text, parse_mode='html')
 
-        try:
+        try: #2
             bot.get_chat(info_about_replying_chat.id)
         except apihelper.ApiTelegramException:
-            bot.send_message(
-                message.chat.id,
-                "Бот не знаходится у каналі\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
-                parse_mode='html'
-            )
-            return
+            text= "Бот не знаходится у каналі\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>"
+            return bot.send_message(message.chat.id, text, parse_mode='html')
 
-        if uncustomizer_chek(info_about_replying_chat.id, message.from_user.id):
-            bot.send_message(
-                message.chat.id,
-                "Ви не є адмінстартором цього каналу\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>",
-                parse_mode='html'
-            )
-            return
+        if uncustomizer_chek(info_about_replying_chat.id, message.from_user.id): #3
+            text= "Ви не є адмінстартором цього каналу\n<b><a href='https://t.me/SupYb/24'>Інструкція налаштування для каналів</a></b>"
+            return bot.send_message(message.chat.id, text, parse_mode='html')
 
         audience.reload()
-        bot.reply_to(
-            message.reply_to_message,
-            f'Надсилати повідомлення до каналу \'<b>{info_about_replying_chat.title}</b>\', коли тривога буде в:',
-            parse_mode='html',
+        text= f'Надсилати повідомлення до каналу \'<b>{info_about_replying_chat.title}</b>\', коли тривога буде в:'
+        bot.reply_to(message.reply_to_message, text, parse_mode='html',
             reply_markup=markup_generator(info_about_replying_chat.id)
         )
     else:
         audience.reload()
-        bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде в:', reply_markup=markup_generator(message.chat.id))
+        return bot.send_message(message.chat.id, 'Надсилати повідомлення, коли тривога буде в:',
+            reply_markup=markup_generator(message.chat.id)
+        )
 
 def callback_form(call):
     if uncustomizer_chek(call.message.chat.id, call.from_user.id):
@@ -160,7 +144,7 @@ def callback_form(call):
             text="Повідомлення не будуть надходити",
             reply_markup=None)
 
-    elif code=="A":
+    elif code=="A": #all
         time.sleep(1)
         if audience.get_subscriptions(sub_id):
             audience.del_SubId(sub_id)
@@ -169,7 +153,10 @@ def callback_form(call):
                 audience[state].append(sub_id)
 
         audience.save()
-        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:", reply_markup=markup_generator(sub_id))
+        bot.edit_message_text(chat_id=call.message.chat.id,
+            message_id=call.message.message_id, text="Надсилати повідомлення, коли тривога буде у:",
+            reply_markup=markup_generator(sub_id)
+        )
 
 
     else:
