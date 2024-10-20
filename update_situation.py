@@ -157,7 +157,9 @@ def main():
             thread.start()
 
         for thread in list_threads:
-            thread.join()
+            thread.join(timeout=240.0)
+
+        list_threads.clear()
 
         with open('data/situation.json', 'w') as f:
             json.dump(situation, f)

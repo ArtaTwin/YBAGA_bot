@@ -42,7 +42,7 @@ bot= TeleBot(secret.TOKEN, exception_handler=ExceptionHandler())
 security_level= 1
 
 make_warning(20, f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
-threading.Thread(target=update_situation.main, daemon=True).start()
+threading.Thread(target=update_situation.main, daemon=False).start()
 time.sleep(10)
 
 @bot.message_handler(commands=['test', 't', 'ping', 'p'])
