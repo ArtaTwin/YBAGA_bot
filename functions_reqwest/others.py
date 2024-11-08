@@ -32,3 +32,9 @@ def dc(message): #decoder
         util.extract_arguments(message.text)
     )
     return bot.send_message(message.chat.id, f"bin: <pre>{bin}</pre>\nid: <pre>{id}</pre>", parse_mode='html')
+
+
+def get_situation(message):
+    with open("data/situation.json", 'rb') as f:
+        return_message= bot.send_document(message.chat.id, f)
+    return return_message

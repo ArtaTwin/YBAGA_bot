@@ -6,7 +6,7 @@ from functions_reqwest import others, ban_func
 dict_function= {
     "info" : _info.info, "i" : _info.info,
     "map" : _photo.photo, "m" : _photo.photo,
-    "form" : form_controller.form
+    "form" : form_controller.form, "f" : form_controller.form
 }
 
 list_function= list(dict_function)
@@ -19,7 +19,7 @@ dict_admin_function= {
     "decoder" : others.dc, "dc" : others.dc,
     "get_log" : others.get_log, "glog" : others.get_log,
     "cleen_log" : others.cleen_log, "clog" : others.cleen_log,
-
+    "get_situation" : others.get_situation
 }
 
 list_admin_function= list(dict_admin_function)

@@ -96,7 +96,7 @@ def callback_form(call):
     if uncustomizer_chek(call.message.chat.id, call.from_user.id):
         time.sleep(1)
         bot.answer_callback_query(callback_query_id=call.id, show_alert=True,
-            text="Взаємодіяти з цією формою може тільки автор групи або адмінітратор"
+            text="Взаємодіяти з цією формою може тільки власник групи або адміністратор"
         )
         return
 

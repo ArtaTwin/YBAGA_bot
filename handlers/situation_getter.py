@@ -24,3 +24,14 @@ def get_situation(sub_id):
             situation = json.load(f)
 
     return situation
+
+def timedelta(t):
+    t = time.time()-t
+    if t < 120:
+        return " 1 хв"
+    elif t < 3600:
+        return f" {t//60:.0f} хв"
+    elif t < 86400:
+        return f" {t//3600:.0f} год"
+    else:
+        return f" {t//86400:.0f} д"

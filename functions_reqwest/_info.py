@@ -6,24 +6,11 @@ from pytz      import timezone
 from telebot   import TeleBot
 
 import secret
-from handlers.situation_getter import get_situation
+from handlers.situation_getter import get_situation, timedelta
 from handlers.stenography_handler import writing
 from handlers.texts import INFO
 
-
 bot = TeleBot(secret.TOKEN)
-
-def timedelta(t):
-    t = time.time()-t
-    if t < 120:
-        return " 1 хв"
-    elif t < 3600:
-        return f" {t//60:.0f} хв"
-    elif t < 86400:
-        return f" {t//3600:.0f} год"
-    else:
-        return f" {t//86400:.0f} д"
-
 
 def info(message, security_level=3):
     date= datetime.fromtimestamp(

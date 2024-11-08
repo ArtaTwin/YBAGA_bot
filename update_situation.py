@@ -12,33 +12,43 @@ from handlers.Audience_meneger import Audience
 from handlers.BanList_meneger import BanTuple
 from handlers.error_handler import *
 from functions_reqwest import _photo
+from handlers.situation_getter import timedelta
 
+sess = requests.Session()
+adapter = requests.adapters.HTTPAdapter(
+    pool_connections=100,
+    pool_maxsize=100)
+sess.mount('https://air-save.ops.ajax.systems', adapter)
 
-def check(state_id):
+def check_alarm(state_id):
     my_timeout = 10
+    my_waiting = 10
     while True:
         try:
-            r= requests.get(
+            r= sess.get(
                 'https://air-save.ops.ajax.systems/api/mobile/status',
                 params={'regionId':state_id},
-                headers={'Connection': 'close'},
                 timeout=my_timeout
             )
+            sess.close()
         except requests.exceptions.Timeout:
             my_timeout += 10
         except Exception as e:
-            make_warning(40, f"Error with data updating. {repr(e)}", exc_info=True)
+            make_warning(40, f"Error with data updating. Next try in {my_waiting} sec. {repr(e)}", exc_info=True)
+            my_waiting += 10
         else:
             if r.ok:
                 return bool(
                     r.json()["alarms"]
                 )
-            elif my_timeout < 60:
-                make_warning(30, f"Problem with data updating. Code: {r.status_code}. Text: {r.text}")
-                my_timeout += 10
+            elif my_waiting < 120:
+                my_waiting += 10
+                make_warning(30, f"Problem with data updating. Next try in {my_waiting} sec. Code: {r.status_code}. Text: {r.text}")
             else: #total: 210 sec waiting
                 make_warning(40, f"Problem with data updating. Code: {r.status_code}. Text: {r.text}")
                 return None
+        finally:
+            time.sleep(my_waiting)
 
 def notifications(good_list, bad_list):
     audience = Audience(r'data/audience.json')
@@ -78,20 +88,20 @@ def notifications(good_list, bad_list):
             except Exception as e:
                 make_warning(40, f"Error with notifications. {repr(e)}", exc_info=True)
 
-    text= '✅ '+ date+ '\nУ <b><a href="https://t.me/YBAGA_bot">{state}</a></b> відбій тривоги ✅'
+    text= '✅ '+ date+ '\nУ <b><a href="https://t.me/YBAGA_bot">{state}</a></b> відбій тривоги ✅\nТривога тривала: {duration_past_status}'
 
-    for state in good_list:
+    for state, duration_past_status in good_list.items():
         distribution(subscribers= audience[state],
-            send_text= text.format(state=state)
+            send_text= text.format(state=state, duration_past_status=duration_past_status)
         )
 
-    text= '🚨 '+ date+ '\n<b>У <a href="https://t.me/YBAGA_bot">{state}</a> розпочалася тривога </b> 🚨'
+    text= '🚨 '+ date+ '\n<b>У <a href="https://t.me/YBAGA_bot">{state}</a> розпочалася тривога </b> 🚨\nТиша тривала: {duration_past_status}'
     if len(bad_list) > 10:
         text += "\nМожливі пуски ракет з МіГ-31К"
 
-    for state in bad_list:
+    for state, duration_past_status in bad_list.items():
         distribution(subscribers= audience[state],
-            send_text= text.format(state=state)
+            send_text= text.format(state=state, duration_past_status=duration_past_status)
         )
 
     audience.save()
@@ -111,7 +121,7 @@ def main():
     print(f"<{datetime.now().strftime('%x %X')}> main of update_situatiaon.py started")
 
     def N(x, state_info): #!!! rename
-        alarm_state = check(state_info["stateId"])
+        alarm_state = check_alarm(state_info["stateId"])
         if alarm_state == None:
             return
 
@@ -119,12 +129,14 @@ def main():
         if alarm_state == state_situation["alarm"]:
             return
 
+        duration_past_status = timedelta(state_situation["date"])
+
         state_situation["alarm"] = alarm_state
         state_situation["date"] = int(time.time())
         if alarm_state:
-            bad_list.append(state_info["Name"])
+            bad_list[state_info["Name"]] = duration_past_status
         else:
-            good_list.append(state_info["Name"])
+            good_list[state_info["Name"]] = duration_past_status
 
 
     with open('static/states_info.json' , "rb") as f:
@@ -144,12 +156,12 @@ def main():
             for state in states_info
         ]
 
-    good_list = list()
-    bad_list = list()
+    good_list = dict() #!!! rename
+    bad_list = dict() #!!! rename
 
     while True:
         list_threads= [
-            threading.Thread(target=N, args=values)
+            threading.Thread(target=N, args=values, daemon=True)
             for values in enumerate(states_info)
         ]
 
@@ -157,8 +169,9 @@ def main():
             thread.start()
 
         for thread in list_threads:
-            thread.join(timeout=240.0)
+            thread.join(timeout=300.)
 
+        sess.close()
         list_threads.clear()
 
         with open('data/situation.json', 'w') as f:
