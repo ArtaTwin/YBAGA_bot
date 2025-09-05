@@ -30,11 +30,11 @@ def photo(message, security_level=3):
     ).strftime('%d.%m %H:%M')
 
     conclusion = str()
-    alarm_list= [
+    alarm_list= (
         state["Name"]
         for state in situation
         if state["alarm"]
-    ]
+    )
 
     if alarm_list:
         conclusion= "Тривога у:\n"

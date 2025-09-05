@@ -9,7 +9,7 @@ WELCOME= """
 
 PING= """
 {answer}
-версія: 4.8.3
+версія: 4.8.4
 затримка: {ping_time} сек
 {resalt_testing}
 """

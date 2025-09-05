@@ -4,7 +4,6 @@ import time
 from datetime  import datetime
 from pathlib   import Path
 
-from pytz      import timezone
 from telebot   import TeleBot, util, ExceptionHandler
 
 import secret
@@ -15,7 +14,7 @@ from handlers.texts import WELCOME, INFORMANT, PING
 
 def information(message):
     if security_level == 0:
-        return
+        return 0
 
     information_text= INFORMANT.format(
         date= datetime.fromtimestamp(message.date).strftime('%d/%m/%Y %H:%M:%S'),
@@ -42,62 +41,20 @@ bot= TeleBot(secret.TOKEN, exception_handler=ExceptionHandler())
 security_level= 1
 
 make_warning(20, f"<{datetime.now().strftime('%x %X')}> Trevoga_bot.py started")
-threading.Thread(target=update_situation.main, daemon=True).start()
-time.sleep(10)
 
-@bot.message_handler(commands=['test', 't', 'ping', 'p'])
-def ping(message):
-    answer= 'tost' if 't' in util.extract_command(message.text) else 'pong'
-    ping_time= round(time.time()-message.date,2)
-    resalt_testing= [
-        [func, None]
-        for func in functions_reqwest.list_my_tg_funcs
-    ]
+update_situation.LOOP= True
+update_situation_thread= threading.Thread(target=update_situation.main, daemon=True)
+update_situation_thread.start()
 
-    def repr_resalt_test_func(item_func):
-        one = item_func[0].__name__
-        two = str()
+time.sleep(25)
+update_situation.LOOP= False
+update_situation_thread.join(timeout=120.)
 
-        if item_func[-1] == None:
-            two= '🔘'
-        elif item_func[-1]:
-            two= '✔️'
-        else:
-            two= '✖️'
+update_situation.LOOP= True
+update_situation_thread= threading.Thread(target=update_situation.main, daemon=True)
+update_situation_thread.start()
 
-        return f"{one} >> {two}"
-
-    text= PING.format(
-        answer= answer,
-        ping_time= ping_time,
-        resalt_testing= "\n".join(
-            map(repr_resalt_test_func, resalt_testing)
-        )
-    )
-    bot_message= bot.send_message(message.chat.id, text)
-
-    for n, item_func in enumerate(resalt_testing):
-        try:
-            test_message = item_func[0](message)
-        except:
-            resalt_testing[n][-1] = False
-        else:
-            time.sleep(3)
-            bot.delete_message(test_message.chat.id, test_message.message_id)
-            resalt_testing[n][-1] = True
-
-        text= PING.format(
-            answer= answer,
-            ping_time= ping_time,
-            resalt_testing= "\n".join(
-                map(repr_resalt_test_func, resalt_testing)
-            )
-        )
-
-        bot.edit_message_text(chat_id=bot_message.chat.id,
-            message_id=bot_message.message_id, text=text,
-        )
-
+make_warning(20, f"<{datetime.now().strftime('%x %X')}> message_handlers of Trevoga_bot.py started")
 
 @bot.message_handler(commands=['restart', 'r'])
 def restart(message):
@@ -107,8 +64,53 @@ def restart(message):
             f"{datetime.fromtimestamp(message.date).strftime('%x %X')}\n Bot start to restart"
         )
 
-        #This forces telebot to crash exit. It will be restarted by service script. We tried exit(1), KeyboardInterrup, but they don't work as good as 1/0
+        update_situation.LOOP= False
+        update_situation_thread.join(timeout=120.)
+
+        #This forces telebot to crash exit. It will be restarted by service script. We tried exit(0), KeyboardInterrup, but they don't work as good as 1/0
         1/0
+
+@bot.message_handler(commands=['test', 't', 'ping', 'p'])
+def ping(message):
+    answer= "tost" if 't' in util.extract_command(message.text) else "pong"
+    ping_time= round(time.time()-message.date,2)
+    resalt_of_tests= [
+        [tg_func.__name__, 0]
+        for tg_func in functions_reqwest.list_my_tg_funcs
+    ]
+
+    def repr_resalt_of_tests():
+        return "\n".join(map(
+            lambda item: item[0]+ " >> "+ ('🔘', '✔️', '✖️')[item[1]],
+            resalt_of_tests
+        ))
+
+    text= PING.format(
+        answer= answer,
+        ping_time= ping_time,
+        resalt_testing= repr_resalt_of_tests()
+    )
+
+    bot_message= bot.send_message(message.chat.id, text)
+
+    for n, tg_func in enumerate(functions_reqwest.list_my_tg_funcs):
+        try:
+            test_message = tg_func(message)
+        except:
+            resalt_of_tests[n][1] = 2
+        else:
+            time.sleep(3)
+            bot.delete_message(test_message.chat.id, test_message.message_id)
+            resalt_of_tests[n][1] = 1
+
+        text= PING.format(
+            answer= answer,
+            ping_time= ping_time,
+            resalt_testing= repr_resalt_of_tests()
+        )
+
+        bot.edit_message_text(chat_id=bot_message.chat.id,
+            message_id=bot_message.message_id, text=text)
 
 @bot.message_handler(commands=['su']) #security_level up
 def su(message):
